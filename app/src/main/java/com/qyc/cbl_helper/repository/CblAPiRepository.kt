@@ -1,9 +1,9 @@
 package com.qyc.cbl_helper.repository
 
 
-import cn.cpocar.qyc_cbl.http.CblApi
+import com.qyc.cbl_helper.http.CblApi
 import com.qyc.cbl_helper.http.CblApiService
-import cn.cpocar.qyc_cbl.model.ChbLoginEncInfo
+import com.qyc.cbl_helper.model.ChbLoginEncInfo
 import cn.cpocar.qyc_cbl.model.ShopConfInfo
 import com.qyc.cbl_helper.http.coroutineApiCall
 import com.qyc.cbl_helper.http.coroutineApiCallBase

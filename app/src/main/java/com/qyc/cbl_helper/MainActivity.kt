@@ -8,9 +8,17 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.databinding.ActivityMainBinding
+import com.qyc.cbl_helper.http.ChbApi
+import com.qyc.cbl_helper.http.ChbApiService
+import com.qyc.cbl_helper.http.PingAnApi
+import com.qyc.cbl_helper.http.PingAnApiService
+import com.qyc.cbl_helper.repository.PingAnAPiRepository
 import com.qyc.cbl_helper.service.SmsSyncService
 import com.qyc.cbl_helper.util.AppUtil
 import com.qyc.cbl_helper.websocket.JWebSocketClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.java_websocket.handshake.ServerHandshake
 import java.lang.Exception
 import java.net.URI
@@ -22,39 +30,74 @@ class MainActivity : AppCompatActivity() {
     var wsUrl = "wss:$BASE_URL/api/v1/ws"
     private lateinit var binding: ActivityMainBinding
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        startService(Intent(this, SmsSyncService::class.java).apply {action = SmsSyncService.START_SMS_LISTENER})
+//        initWebSocket()
+        startService()
+//        openNpcAPP()
+
 
         binding.buttonFirst.setOnClickListener(View.OnClickListener {
-            AppUtil.startLaunchAPP(this, AppConstant.npsPackName,AppConstant.npsMain)
+            GlobalScope.launch(Dispatchers.IO) {
+                login("18513979168", "108580");
+            }
+//            Log.e("a","----hasSIMCard---->"+AppUtil.hasSIMCard(this))
         })
     }
 
 
+    suspend fun login(mobile: String, verifyCode: String) {
+        val url = "oauth/access/login/V2/authCodeLogin?telephone=$mobile&code=$verifyCode"
+        val result = PingAnAPiRepository.pingAnLogin(url)
+        var url2 = "oauth/access/login/sendAuthCode?telephone=$mobile"
+        val result2 = PingAnAPiRepository.pingAnLoginSendSms(url2)
+
+        Log.e("", "-------result2----->${result2}")
+//        val loginEncRes = CblAPiRepository.chbLoginEnc(
+//            acc = getAcc()!!,
+//            pwd = getPwd()!!,
+//            uuid = AppUtil.getUUID(),
+//            brand = Build.MANUFACTURER.uppercase(Locale.getDefault())
+//        )
+//        val loginRes = ChbAPiRepository.login(
+//            deviceEnc = loginEncRes.deviceEnc,
+//            content = loginEncRes.loginEnc
+//        )
+    }
+
+    private fun startService() {
+        startService(Intent(this, SmsSyncService::class.java).apply {
+            action = SmsSyncService.START_SMS_LISTENER
+        })
+    }
+
+    private fun openNpcAPP() {
+        AppUtil.startLaunchAPP(this, AppConstant.npsPackName, AppConstant.npsMain)
+    }
 
     override fun onResume() {
         super.onResume()
-        mHandler.postDelayed(heartBeatRunnable, HEART_BEAT_RATE) //开启心跳检测
-        if (client == null) {
-            Log.e(TAG, "``````````````````````onResume")
-            initWebSocket()
-        } else if (!client!!.isOpen) {
-            reconnectWs() //进入页面发现断开开启重连
-        }
+//        mHandler.postDelayed(heartBeatRunnable, HEART_BEAT_RATE) //开启心跳检测
+//        if (client == null) {
+//            Log.e(TAG, "--------onResume---------")
+//            initWebSocket()
+//        } else if (!client!!.isOpen) {
+//            reconnectWs() //进入页面发现断开开启重连
+//        }
     }
 
     override fun onStop() {
         super.onStop()
-        Log.e(TAG, "``````````````````````````````onStop")
+        Log.e(TAG, "-------onStop----------")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.e(TAG, "`````````````````````````onDestroy")
+        Log.e(TAG, "---------onDestroy--------onDestroy")
         closeConnect()
     }
 
@@ -109,7 +152,7 @@ class MainActivity : AppCompatActivity() {
      */
     fun sendMsg(msg: String) {
         if (null != client) {
-            Log.e("", "^_^Websocket发送的消息：-----------------------------------^_^$msg")
+            Log.e(TAG, "--------Websocket发送的消息：------->$msg")
             if (client!!.isOpen) {
                 client!!.send(msg)
             }
@@ -120,13 +163,15 @@ class MainActivity : AppCompatActivity() {
      * 开启重连
      */
     private fun reconnectWs() {
-        mHandler!!.removeCallbacks(heartBeatRunnable)
+        mHandler.removeCallbacks(heartBeatRunnable)
         object : Thread() {
             override fun run() {
                 try {
-                    Log.e("开启重连", "")
-                    client!!.reconnectBlocking()
-                } catch (e: InterruptedException) {
+                    if (client != null) {
+//                        Log.e(TAG, "-------开启重连------")
+                        client?.reconnectBlocking()
+                    }
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
@@ -140,7 +185,7 @@ class MainActivity : AppCompatActivity() {
         try {
             //关闭websocket
             if (null != client) {
-                client!!.close()
+                client?.close()
             }
             //停止心跳
             mHandler.removeCallbacksAndMessages(null)
@@ -156,14 +201,14 @@ class MainActivity : AppCompatActivity() {
         override fun run() {
             if (client != null) {
                 if (client!!.isClosed) {
-                    Log.e("心跳包检测websocket连接状态1", client!!.isOpen.toString() + "/")
+                    Log.e(TAG, "心跳包检测websocket连接状态1" + client!!.isOpen.toString() + "/")
                     reconnectWs() //心跳机制发现断开开启重连
                 } else {
-                    Log.e("心跳包检测websocket连接状态2", client!!.isOpen.toString() + "/")
+                    Log.e(TAG, "心跳包检测websocket连接状态2" + client!!.isOpen.toString() + "/")
                     sendMsg("Heartbeat")
                 }
             } else {
-                Log.e("心跳包检测websocket连接状态重新连接", "")
+                Log.e(TAG, "心跳包检测websocket连接状态重新连接")
                 //如果client已为空，重新初始化连接
                 client = null
                 initWebSocket()
@@ -173,9 +218,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        //    -------------------------------------websocket心跳检测------------------------------------------------
-        private const val HEART_BEAT_RATE = (30 * 1000 //每隔10秒进行一次对长连接的心跳检测
-                ).toLong()
+    companion object { //每隔10秒进行一次对长连接的心跳检测
+        private const val HEART_BEAT_RATE = (30 * 1000).toLong()
     }
 }

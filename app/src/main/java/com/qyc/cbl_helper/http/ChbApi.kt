@@ -1,4 +1,4 @@
-package cn.cpocar.qyc_cbl.http
+package com.qyc.cbl_helper.http
 
 import com.google.gson.JsonObject
 import retrofit2.http.Body

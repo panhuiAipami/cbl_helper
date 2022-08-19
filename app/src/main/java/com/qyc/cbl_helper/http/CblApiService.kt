@@ -1,5 +1,6 @@
 package com.qyc.cbl_helper.http
 
+import android.util.Log
 import com.qyc.cbl_helper.common.UserInfoHelper
 import com.qyc.cbl_helper.constant.AppConstant
 import okhttp3.Interceptor
@@ -32,6 +33,8 @@ object CblApiService : BaseApiService() {
             if (mUserInfoHelper.isLogin()) {
                 mUserInfoHelper.logout()
             }
+        }else if(response.code == 500){
+            Log.e("a","-------response------>$response")
         }
         response
     }

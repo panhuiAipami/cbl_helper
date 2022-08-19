@@ -1,8 +1,8 @@
-package cn.cpocar.qyc_cbl.repository
+package com.qyc.cbl_helper.repository
 
 
 
-import cn.cpocar.qyc_cbl.http.PingAnApi
+import com.qyc.cbl_helper.http.PingAnApi
 import com.qyc.cbl_helper.http.PingAnApiService
 import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
@@ -43,5 +43,13 @@ object PingAnAPiRepository {
             token = mToken,
             req = mapOf( "clueId" to clueId)
         )
+    }
+
+    suspend fun pingAnLogin( url: String): JsonObject? = withContext(Dispatchers.IO) {
+        mApi.pingAnLogin(url = url)
+    }
+
+    suspend fun pingAnLoginSendSms( url: String): JsonObject? = withContext(Dispatchers.IO) {
+        mApi.pingAnLoginSendSms(url = url)
     }
 }

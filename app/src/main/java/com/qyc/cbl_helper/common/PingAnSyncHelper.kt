@@ -1,10 +1,8 @@
 package com.qyc.cbl_helper.common
 
-import android.os.Build
 import android.text.format.DateFormat
 import android.util.Log
-import androidx.annotation.RequiresApi
-import cn.cpocar.qyc_cbl.repository.PingAnAPiRepository
+import com.qyc.cbl_helper.repository.PingAnAPiRepository
 import cn.cpocar.qyc_cbl.util.AESCrypt
 import com.google.gson.JsonObject
 import com.orhanobut.hawk.Hawk

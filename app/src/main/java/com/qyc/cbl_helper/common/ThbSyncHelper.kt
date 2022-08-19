@@ -2,7 +2,7 @@ package com.qyc.cbl_helper.common
 
 import android.os.Build
 import android.util.Log
-import cn.cpocar.qyc_cbl.repository.ChbAPiRepository
+import com.qyc.cbl_helper.repository.ChbAPiRepository
 import cn.cpocar.qyc_cbl.util.AESCrypt
 import com.qyc.cbl_helper.util.AppUtil
 import com.orhanobut.hawk.Hawk

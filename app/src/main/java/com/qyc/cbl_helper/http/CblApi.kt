@@ -1,8 +1,8 @@
-package cn.cpocar.qyc_cbl.http
+package com.qyc.cbl_helper.http
 
 import com.qyc.cbl_helper.http.response.base.BaseResponse
 import com.qyc.cbl_helper.http.response.base.CommonResponse
-import cn.cpocar.qyc_cbl.model.ChbLoginEncInfo
+import com.qyc.cbl_helper.model.ChbLoginEncInfo
 import cn.cpocar.qyc_cbl.model.ShopConfInfo
 import com.qyc.cbl_helper.http.request.*
 import com.qyc.cbl_helper.http.request.ChbLoginEnc

@@ -4,15 +4,16 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.TELEPHONY_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.BatteryManager
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
@@ -20,7 +21,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.startActivity
 import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.MyApplication
 import com.qyc.cbl_helper.constant.AppConstant
@@ -54,38 +54,15 @@ class AppUtil {
          * 通过包名启动第三方应用
          */
         fun startLaunchAPP(context: Context, packageName: String,activityName:String) {
-            var mainAct: String? = activityName
-            val pkgMag = context.packageManager
-            val intent = Intent(Intent.ACTION_MAIN)
-            intent.addCategory(Intent.CATEGORY_LAUNCHER)
-            intent.flags = Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED or Intent.FLAG_ACTIVITY_NEW_TASK
-            //如果已经启动apk，则直接将apk从后台调到前台运行（类似home键之后再点击apk图标启动），如果未启动apk，则重新启动
-            @SuppressLint("WrongConstant")
-            val list = pkgMag.queryIntentActivities(
-                intent,
-                PackageManager.GET_ACTIVITIES
-            )
-            for (i in list.indices) {
-                val info = list[i]
-                Log.e("a","${info.activityInfo.name}------for----->${info.activityInfo.packageName}")
-                if (info.activityInfo.packageName == packageName) {
-                    mainAct = info.activityInfo.name
-                    Log.e("a","------packageName----->$mainAct")
-                    break
-                }
+            try {
+                val intent = Intent(Intent.ACTION_MAIN)
+                intent.addCategory(Intent.CATEGORY_LAUNCHER)
+                intent.flags = Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED or Intent.FLAG_ACTIVITY_NEW_TASK
+                intent.component = ComponentName(packageName,activityName)
+                context.startActivity(intent)
+            }catch (e:Exception){
+                e.printStackTrace()
             }
-            Log.e("a","------mainAct----->$mainAct")
-//            if (TextUtils.isEmpty(mainAct)) {
-//                return
-//            }
-            // 启动指定的activity页面
-            //intent.component = ComponentName(packageName,activityName)
-            //启动到app的主页或启动到原来留下的位置
-            intent.component = ComponentName(packageName,mainAct!!)
-            //启动app
-            context.startActivity(intent)
-
-
         }
 
         /**
@@ -101,6 +78,15 @@ class AppUtil {
                 Log.i(AppConstant.TAG_COMMON, "AppUtil > openCurrentApp() fail：${e.message}")
             }
         }
+
+
+        fun  hasSIMCard(context: Context): Boolean {
+            val telMgr:TelephonyManager =
+                context.getSystemService(TELEPHONY_SERVICE) as TelephonyManager;
+            val simState = telMgr.simState;
+            return simState==TelephonyManager.SIM_STATE_READY
+        }
+
 
         /**
          * 是否在充电中

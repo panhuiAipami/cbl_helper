@@ -1,6 +1,5 @@
-package cn.cpocar.qyc_cbl.http
+package com.qyc.cbl_helper.http
 
-import com.qyc.cbl_helper.http.BaseApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory

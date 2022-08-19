@@ -1,8 +1,8 @@
-package cn.cpocar.qyc_cbl.repository
+package com.qyc.cbl_helper.repository
 
 
-import cn.cpocar.qyc_cbl.http.ChbApi
-import cn.cpocar.qyc_cbl.http.ChbApiService
+import com.qyc.cbl_helper.http.ChbApi
+import com.qyc.cbl_helper.http.ChbApiService
 import com.google.gson.JsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

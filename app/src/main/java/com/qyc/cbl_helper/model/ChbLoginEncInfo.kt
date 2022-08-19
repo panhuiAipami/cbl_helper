@@ -1,4 +1,4 @@
-package cn.cpocar.qyc_cbl.model
+package com.qyc.cbl_helper.model
 
 data class ChbLoginEncInfo(
     var loginEnc: String,
