@@ -1,6 +1,7 @@
 package com.qyc.cbl_helper.http
 
 import android.util.Log
+import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.common.UserInfoHelper
 import com.qyc.cbl_helper.constant.AppConstant
 import okhttp3.Interceptor
@@ -13,16 +14,14 @@ import okhttp3.Interceptor
 object CblApiService : BaseApiService() {
     private val mUserInfoHelper: UserInfoHelper = UserInfoHelper
 
-    override fun getApiBaseUrl() = if (AppConstant.DEBUG) "https://test-lark.cpocar.cn/api/" else "https://cbl.qyccar.com/api/"
+    override fun getApiBaseUrl() =
+        if (AppConstant.DEBUG) "https://test-lark.cpocar.cn/api/" else "https://cbl.qyccar.com/api/"
 
     override fun headerTokenInterceptor() = Interceptor { chain ->
         // 统一 Header Token 处理
         val originalRequest = chain.request()
-        if (!mUserInfoHelper.isLogin()) {
-            chain.proceed(originalRequest)
-        } else {
-            chain.proceed(originalRequest.newBuilder().header("x-lark-token", mUserInfoHelper.getAppToken()!!).build())
-        }
+        var token: String = Hawk.get(AppConstant.TOKEN, "")
+        chain.proceed(originalRequest.newBuilder().header("x-lark-token", token).build())
     }
 
     override fun tokenExpiredInterceptor() = Interceptor { chain ->
@@ -33,8 +32,6 @@ object CblApiService : BaseApiService() {
             if (mUserInfoHelper.isLogin()) {
                 mUserInfoHelper.logout()
             }
-        }else if(response.code == 500){
-            Log.e("a","-------response------>$response")
         }
         response
     }

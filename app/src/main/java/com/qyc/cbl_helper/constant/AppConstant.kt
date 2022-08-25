@@ -3,7 +3,7 @@ package com.qyc.cbl_helper.constant
 class AppConstant private constructor() {
 
     companion object {
-        const val DEBUG = false
+        const val DEBUG = true
         const val APP_NAME = "车百灵助手"
 
         const val npsMain = "org.golang.app.GoNativeActivity"
@@ -11,12 +11,14 @@ class AppConstant private constructor() {
         const val cblMain = "cn.cpocar.qyc_cbl.MainActivity"
         const val cblPackName = "cn.cpocar.qyc_cbl"
 
+        const val TOKEN = "app_token"
+        const val ACTION = "action"
+        const val REPORT_THB_ACCOUNT_INFO = "report_THB_account_info"
+        const val REPORT_HHB_ACCOUNT_INFO = "report_HHB_account_info"
+        const val GET_THB_ACCOUNT_INFO = "get_THB_account_info"
+        const val GET_HHB_ACCOUNT_INFO = "get_HHB_account_info"
+        const val DEVELOPMENT_BOARD_STATUS = "development_board_status"
 
-        const val HW_PUSH_UPDATE_TOKEN_ACTION = "hw_push_update_token_action"
-        const val HW_PUSH_TOKEN_KEY = "hw_token"
-
-        const val MI_PUSH_APP_ID = "2882303761518787036"
-        const val MI_PUSH_APP_KEY = "5641878759036"
 
         const val TAG_LOG_CALL = "cbl_tag_lc"
         const val TAG_LOCATION_REPORT = "cbl_location_report"

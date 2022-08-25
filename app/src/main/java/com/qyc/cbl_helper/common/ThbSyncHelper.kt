@@ -94,6 +94,7 @@ object ThbSyncHelper {
     fun getAcc(): String? = mAcc
     fun getPwd(): String? = mPwd
     fun getDeviceEnc(): String? = mDeviceEnc
+
     private fun getBranchCode(): String? = mBranchCode
     private fun getVehicleCode(): String? = mVehicleCode
     private fun getVehicleName(): String? = mVehicleName

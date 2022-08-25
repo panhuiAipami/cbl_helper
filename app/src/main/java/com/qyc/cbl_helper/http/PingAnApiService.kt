@@ -1,5 +1,6 @@
 package com.qyc.cbl_helper.http
 
+import android.util.Log
 import com.qyc.cbl_helper.common.PingAnSyncHelper
 import com.qyc.cbl_helper.common.PushMessageNotificationHelper
 import com.qyc.cbl_helper.common.TpAppTypeEnum
@@ -27,6 +28,8 @@ object PingAnApiService : BaseApiService() {
         if (response.code == 401) {
             PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.HHB)
             PingAnSyncHelper.clearAllInfo()
+        }else if(response.code == 500){
+            Log.e("a","---PA----response------>$response")
         }
         response
     }

@@ -41,6 +41,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".NpsActivity"></activity>
+
         <service
             android:name=".service.SmsSyncService"
             android:enabled="true"
