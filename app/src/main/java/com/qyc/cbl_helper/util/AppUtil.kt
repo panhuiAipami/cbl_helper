@@ -21,9 +21,12 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.startActivity
 import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.MyApplication
+import com.qyc.cbl_helper.NpsActivity
 import com.qyc.cbl_helper.constant.AppConstant
+import com.qyc.cbl_helper.service.SmsSyncService
 import java.math.BigDecimal
 import java.util.*
 import kotlin.math.abs
@@ -64,6 +67,28 @@ class AppUtil {
                 e.printStackTrace()
             }
         }
+
+        /**
+         * 启动前台服务
+         */
+         fun startService(context: Context) {
+            context.startService(Intent(context, SmsSyncService::class.java).apply {
+                action = SmsSyncService.START_SMS_LISTENER
+            })
+        }
+
+        /**
+         * 启动nps
+         */
+         fun openNpcAPP(context: Context) {
+            AppUtil.startLaunchAPP(context, AppConstant.npsPackName, AppConstant.npsMain)
+        }
+
+
+         fun startAct(context: Context) {
+            context.startActivity(Intent(context, NpsActivity::class.java))
+        }
+
 
         /**
          * 跳转到当前APP
@@ -175,16 +200,32 @@ class AppUtil {
             return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         }
 
-        /**
-         * 判断是否是 wifi
-         *
-         * @return true 开启 false 关闭
-         */
-        @Suppress("DEPRECATION")
-        @SuppressLint("MissingPermission")
-        fun isWifiConnected(): Boolean {
-            val connectivityManager = MyApplication.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)?.isConnected ?: false
+        //判断网络状态，有网络返回true
+        fun isConnected() : Boolean{
+            if(isNetworkConnected() || isWifiConnected()){
+                return true
+            }
+            return false
+        }
+
+        //判断手机是否有网络连接
+        private fun isNetworkConnected() : Boolean{
+                val mConnectivityManager = MyApplication.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val mNetworkInfo = mConnectivityManager.activeNetworkInfo
+                if(mNetworkInfo != null){
+                    return mNetworkInfo.isAvailable
+                }
+            return false
+        }
+
+        //判断wifi网络是否可用
+        private fun isWifiConnected() : Boolean{
+                val mConnectivityManager = MyApplication.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                val mNetworkInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+                if(mNetworkInfo != null){
+                    return mNetworkInfo.isAvailable
+                }
+            return false
         }
 
 

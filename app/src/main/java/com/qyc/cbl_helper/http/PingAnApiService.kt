@@ -26,8 +26,8 @@ object PingAnApiService : BaseApiService() {
         // Token 失效 401 处理
         val response = chain.proceed(chain.request())
         if (response.code == 401) {
-            PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.HHB)
-            PingAnSyncHelper.clearAllInfo()
+//            PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.HHB)
+            PingAnSyncHelper.clearAllInfo(response.code)
         }else if(response.code == 500){
             Log.e("a","---PA----response------>$response")
         }

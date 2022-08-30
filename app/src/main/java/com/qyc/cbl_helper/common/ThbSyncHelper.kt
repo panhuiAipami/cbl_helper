@@ -6,6 +6,7 @@ import com.qyc.cbl_helper.repository.ChbAPiRepository
 import cn.cpocar.qyc_cbl.util.AESCrypt
 import com.qyc.cbl_helper.util.AppUtil
 import com.orhanobut.hawk.Hawk
+import com.qyc.cbl_helper.callback.CallBackSyncStatus
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.http.request.ChbSyncReq
 import com.qyc.cbl_helper.repository.CblAPiRepository
@@ -60,6 +61,8 @@ object ThbSyncHelper {
     private var mVehicleCode: String? = null
     private var mVehicleName: String? = null
     private var mVehicleLevel: String? = null
+
+    private lateinit var callBack: CallBackSyncStatus
 
     fun init() {
         isOpenSync = Hawk.get(LS_KEY_OPEN_SYNC, false)
@@ -269,6 +272,7 @@ object ThbSyncHelper {
                     setManualLoginFlag(false)
                     // 上报内容给服务器
                     Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() find clue size：${repairInfoList?.size()}")
+                    callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_SUCCESS)
                     var uploadSize = 0
                     if (null != repairInfoList && repairInfoList.size() > 0) {
                         var curMaxId = 0L
@@ -329,6 +333,7 @@ object ThbSyncHelper {
                         "querySize" to "${repairInfoList?.size() ?: "0"}",
                         "uploadSize" to "$uploadSize"
                     )
+                    callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_SUCCESS)
                 }
             } catch (e: Exception) {
                 Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() chb fail, e：${e.message}")
@@ -338,12 +343,20 @@ object ThbSyncHelper {
                 // 提示需要手动登录
                 PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.THB)
                 clearAllInfo()
+            }else if(mAcc == null || mPwd == null){
+                callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_FAIL)
             }
         }
     }
 
     private fun clearAllInfo() {
         setInfo(mAcc, mPwd, null, null, null, null, null, null)
+
+        callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_FAIL)
+    }
+
+    fun setCallBack(back: CallBackSyncStatus){
+        callBack = back
     }
 
 }

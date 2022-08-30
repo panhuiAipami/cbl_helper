@@ -8,8 +8,11 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -36,15 +39,70 @@ public class NpsActivity extends AppCompatActivity {
         b1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //发送数据
-                try {
-                    ct.outputStream.write(sendET.getText().toString().getBytes());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+//                try {
+//                    ct.outputStream.write(sendET.getText().toString().getBytes());
+//                } catch (IOException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+                exec("reboot");
             }
         });
     }
+
+    /**
+     * 重启
+     * @param command
+     * @return
+     */
+    private String exec(String command) {
+        Process process = null;
+        BufferedReader reader = null;
+        InputStreamReader is = null;
+        DataOutputStream os = null;
+
+        try {
+            process = Runtime.getRuntime().exec("su");
+            is = new InputStreamReader(process.getInputStream());
+            reader = new BufferedReader(is);
+            os = new DataOutputStream(process.getOutputStream());
+            os.writeBytes(command + "\n");
+            os.writeBytes("exit\n");
+            os.flush();
+            int read;
+            char[] buffer = new char[4096];
+            StringBuilder output = new StringBuilder();
+            while ((read = reader.read(buffer)) > 0) {
+                output.append(buffer, 0, read);
+            }
+            process.waitFor();
+            return output.toString();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+
+                if (is != null) {
+                    is.close();
+                }
+
+                if (reader != null) {
+                    reader.close();
+                }
+
+                if (process != null) {
+                    process.destroy();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 
 
     class ConnectThread extends Thread{

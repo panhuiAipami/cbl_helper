@@ -6,18 +6,24 @@ class AppConstant private constructor() {
         const val DEBUG = true
         const val APP_NAME = "车百灵助手"
 
+        const val SYNC_SUCCESS = 1
+        const val SYNC_FAIL = 0
+
         const val npsMain = "org.golang.app.GoNativeActivity"
         const val npsPackName = "org.nps.client"
         const val cblMain = "cn.cpocar.qyc_cbl.MainActivity"
         const val cblPackName = "cn.cpocar.qyc_cbl"
 
         const val TOKEN = "app_token"
-        const val ACTION = "action"
-        const val REPORT_THB_ACCOUNT_INFO = "report_THB_account_info"
-        const val REPORT_HHB_ACCOUNT_INFO = "report_HHB_account_info"
-        const val GET_THB_ACCOUNT_INFO = "get_THB_account_info"
-        const val GET_HHB_ACCOUNT_INFO = "get_HHB_account_info"
-        const val DEVELOPMENT_BOARD_STATUS = "development_board_status"
+        const val MESSAGE_TYPE = "messageType"
+        const val APP_RESTART = "APP_RESTART"
+        const val APP_LOGIN = "APP_LOGIN"
+        const val APP_EDIT = "APP_EDIT"
+        const val APP_DROP_LINE  = "APP_DROP_LINE"
+        const val APP_CLOSE_SYNC  = "APP_CLOSE_SYNC"
+        const val APP_START_SYNC  = "APP_START_SYNC"
+        const val HEARTBEAT  = "Heartbeat"
+        const val REBOOT  = "reboot"
 
 
         const val TAG_LOG_CALL = "cbl_tag_lc"

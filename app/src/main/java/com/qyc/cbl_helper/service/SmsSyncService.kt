@@ -13,15 +13,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.CATEGORY_SERVICE
 import androidx.core.app.NotificationCompat.PRIORITY_HIGH
-import com.qyc.cbl_helper.common.PingAnSyncHelper
 import com.qyc.cbl_helper.http.request.SmsSyncReqItemInfo
 import com.google.gson.Gson
 import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.MyApplication
 import com.qyc.cbl_helper.R
-import com.qyc.cbl_helper.common.InsSmsMatcherHelper
-import com.qyc.cbl_helper.common.PushMessageNotificationHelper
-import com.qyc.cbl_helper.common.SamplingHelper
+import com.qyc.cbl_helper.common.*
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.constant.AppConstant.Companion.TAG_SMS_SYNC
 import com.qyc.cbl_helper.model.PushMessageInfo
@@ -41,6 +38,7 @@ import java.util.*
  */
 class SmsSyncService : Service() {
     private val sdf by lazy { SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()) }
+    private var randomDelayMinute = 1L
     private val delayMinute: Long by lazy { if (AppConstant.DEBUG) 1L else 5L }
     private val logFile by lazy { "${Environment.getExternalStorageDirectory()}${File.separator}cpocar_cbl.log" }
     private val smsManager by lazy { SmsManager() }
@@ -212,20 +210,20 @@ class SmsSyncService : Service() {
         }
         GlobalScope.launch(Dispatchers.IO) {
             while (isSyncStarted) {
-//                randomDelayMinute = (1..5).random().toLong()
+                randomDelayMinute = (1..5).random().toLong()
                 Log.i(TAG_SMS_SYNC, "SmsSyncService -> heartbeat...")
                 val hour: String = DateFormat.format("HH", Date().time).toString()
                 val hours: Int = hour.toInt()
-//                if(hours in 7..21) {
-//                    Log.i(TAG_SMS_SYNC, "SmsSyncService -> heartbeat $randomDelayMinute min  sync clue")
+                if(hours in 7..21) {
+                    Log.i(TAG_SMS_SYNC, "SmsSyncService -> heartbeat $randomDelayMinute min  sync clue")
 //                    PingAnSyncHelper.handleUpload()
-//                    ThbSyncHelper.handleUpload()
-//                }
+                    ThbSyncHelper.handleUpload()
+                }
                 handleSmsSync("心跳同步", false)
                 printLogToSdCard("sms_sync_heartbeat")
                 SamplingHelper.sampling("SmsSyncService", "sms_sync_heartbeat", "index" to "$index")
                 index++
-                delay(delayMinute * 60 * 1000)
+                delay(randomDelayMinute * 60 * 1000)
             }
         }
     }

@@ -6,9 +6,12 @@ import com.qyc.cbl_helper.repository.PingAnAPiRepository
 import cn.cpocar.qyc_cbl.util.AESCrypt
 import com.google.gson.JsonObject
 import com.orhanobut.hawk.Hawk
+import com.qyc.cbl_helper.MainActivity
+import com.qyc.cbl_helper.callback.CallBackSyncStatus
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.http.request.HhbSyncReq
 import com.qyc.cbl_helper.repository.CblAPiRepository
+import com.qyc.cbl_helper.websocket.JWebSocketClient
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,11 +36,15 @@ object PingAnSyncHelper {
     private var mToken: String? = null
     private var mPhone: String? = null
     private var mIsOpen: Boolean = false
+    private lateinit var callBack: CallBackSyncStatus
+
+
 
     fun init() {
         if (null == mToken) {
             mToken = Hawk.get<String>(LS_KEY_TOKEN)
         }
+
         if (null == mPhone) {
             mPhone = Hawk.get<String>(LS_KEY_PHONE)
         }
@@ -102,6 +109,7 @@ object PingAnSyncHelper {
                     startTime = startTime as String,
                     endTime = endTimeTime as String
                 )
+
                 val code = result?.get("code")?.asString;
                 val msg = result?.get("msg")?.asString;
                 val listData = result?.getAsJsonObject("data");
@@ -117,6 +125,7 @@ object PingAnSyncHelper {
 
                 //获取线索数据成功
                 if (result != null && result.get("success").asBoolean) {
+                    callBack.syncStatus(TpAppTypeEnum.HHB,AppConstant.SYNC_SUCCESS)
                     if (clueList != null) {
                         var lastClueTime = Hawk.get<Long?>(LS_KEY_PINGAN_LAST_SYNC_TIME)
                         val uploadData = mutableListOf<HhbSyncReq>()
@@ -190,15 +199,14 @@ object PingAnSyncHelper {
                             "querySize" to "${clueList?.size() ?: "0"}",
                             "uploadSize" to "${uploadData.size}"
                         )
+                        callBack.syncStatus(TpAppTypeEnum.HHB,AppConstant.SYNC_SUCCESS)
                     }
                 } else {//获取数据失败
-                    PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.HHB)
-                    clearAllInfo()
+                    clearAllInfo(401)
                 }
             } else {
                 //token失效
-                PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.HHB)
-                clearAllInfo()
+                clearAllInfo(401)
             }
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
@@ -228,8 +236,14 @@ object PingAnSyncHelper {
         )
     }
 
-    fun clearAllInfo() {
+    fun clearAllInfo(code:Int) {
         setInfo(null, mPhone, mIsOpen)
+        callBack.syncStatus(TpAppTypeEnum.HHB,code)
+    }
+
+
+    fun setCallBack(back:CallBackSyncStatus){
+        callBack = back
     }
 
 }
