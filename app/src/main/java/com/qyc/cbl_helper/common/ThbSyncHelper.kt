@@ -61,6 +61,7 @@ object ThbSyncHelper {
     private var mVehicleCode: String? = null
     private var mVehicleName: String? = null
     private var mVehicleLevel: String? = null
+    private var reLoginCount: Int = 0
 
     private lateinit var callBack: CallBackSyncStatus
 
@@ -226,7 +227,7 @@ object ThbSyncHelper {
                     // 登出了
                     Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() chb 登出了...")
                     // 重新登录一次
-                    if (!getAcc().isNullOrBlank() && !getPwd().isNullOrBlank()) {
+                    if (!getAcc().isNullOrBlank() && !getPwd().isNullOrBlank() && reLoginCount<3) {
                         Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() ReLogin")
                         try {
                             val loginEncRes = CblAPiRepository.chbLoginEnc(
@@ -251,6 +252,7 @@ object ThbSyncHelper {
                                 }"
                             )
                             if (!newTokenId.isNullOrBlank()) {
+                                reLoginCount++
                                 setTokenId(newTokenId)
                                 handleUpload()
                                 return
@@ -269,6 +271,7 @@ object ThbSyncHelper {
                     PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.THB)
                     clearAllInfo()
                 } else {
+                    reLoginCount = 0
                     setManualLoginFlag(false)
                     // 上报内容给服务器
                     Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() find clue size：${repairInfoList?.size()}")

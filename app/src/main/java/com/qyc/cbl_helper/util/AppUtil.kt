@@ -12,16 +12,18 @@ import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.BatteryManager
+import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.TextUtils
+import android.text.TextUtils.isEmpty
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.startActivity
+
 import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.MyApplication
 import com.qyc.cbl_helper.NpsActivity
@@ -44,7 +46,7 @@ class AppUtil {
         /**
          * 生成 uuid （只会生成一次，再生成要清除 APP 数据）
          */
-        fun getUUID(): String {
+        fun getRandomUUID(): String {
             val cacheUUID: String? = Hawk.get(LS_KEY_GEN_UUID)
             return if (cacheUUID.isNullOrBlank()) {
                 val genUUID = UUID.randomUUID().toString()
@@ -87,6 +89,50 @@ class AppUtil {
 
          fun startAct(context: Context) {
             context.startActivity(Intent(context, NpsActivity::class.java))
+        }
+
+
+        @SuppressLint("HardwareIds")
+        fun getUUID(): String {
+            var id: String? = null
+            val androidId = Settings.Secure.getString(MyApplication.getInstance().contentResolver, Settings.Secure.ANDROID_ID)
+            if (androidId.isNotEmpty() && "9774d56d682e549c" != androidId) {
+                try {
+                    val uuid = UUID.nameUUIDFromBytes(androidId.toByteArray(charset("utf8")))
+                    id = uuid.toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            if (id != null) {
+                return id.ifEmpty { UUID.randomUUID().toString() }
+            }else{
+                id = getRandomUUID()
+            }
+            return id
+        }
+
+        fun getUUID2(): String? {
+            var serial: String? = null
+            val m_szDevIDShort = "35" + Build.BOARD.length % 10 + Build.BRAND.length % 10 + (if (null != Build.CPU_ABI) Build.CPU_ABI.length else 0) % 10 + Build.DEVICE.length % 10 + Build.DISPLAY.length % 10 + Build.HOST.length % 10 + Build.ID.length % 10 + Build.MANUFACTURER.length % 10 + Build.MODEL.length % 10 + Build.PRODUCT.length % 10 + Build.TAGS.length % 10 + Build.TYPE.length % 10 + Build.USER.length % 10 //13 位
+            if (Build.VERSION.SDK_INT <= 29) {
+                try {
+                    serial = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        Build.getSerial()
+                    } else {
+                        Build.SERIAL
+                    }
+                    //API>=9 使用serial号
+                    return UUID(m_szDevIDShort.hashCode().toLong(), serial.hashCode().toLong()).toString()
+                } catch (exception: java.lang.Exception) {
+                    serial = "serial" // 随便一个初始化
+                }
+            } else {
+                serial = Build.UNKNOWN // 随便一个初始化
+            }
+
+            //使用硬件信息拼凑出来的15位号码
+            return UUID(m_szDevIDShort.hashCode().toLong(), serial.hashCode().toLong()).toString()
         }
 
 

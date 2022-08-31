@@ -5,7 +5,6 @@ import android.os.Handler
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.orhanobut.hawk.Hawk
@@ -17,15 +16,18 @@ import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.databinding.ActivityMainBinding
 import com.qyc.cbl_helper.util.AppUtil
 import com.qyc.cbl_helper.websocket.JWebSocketClient
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.java_websocket.handshake.ServerHandshake
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
-import java.lang.Runnable
 import java.net.URI
+
 
 class MainActivity : AppCompatActivity() {
     var TAG = "MainActivity"
@@ -45,19 +47,22 @@ class MainActivity : AppCompatActivity() {
         override fun syncStatus(type: TpAppTypeEnum, code: Int) {
             when (type) {
                 TpAppTypeEnum.THB -> {
-                    thbStatus = code
                     if (code != AppConstant.SYNC_SUCCESS) {
-//                        buildMessage(AppConstant.APP_DROP_LINE)
+                        buildMessage(AppConstant.APP_DROP_LINE)
+                    }else{
+                        buildMessage(AppConstant.APP_EDIT)
                     }
                 }
                 TpAppTypeEnum.HHB -> {
-                    hhbStatus = code
                     if (code != AppConstant.SYNC_SUCCESS) {
-//                        buildMessage(AppConstant.APP_DROP_LINE)
+                        buildMessage(AppConstant.APP_DROP_LINE)
+                    }else{
+                        buildMessage(AppConstant.APP_EDIT)
                     }
                 }
             }
-            Log.i(TAG, "$type------syncStatus-------->$code")
+            setText()
+            Log.i(TAG, "$type------syncStatus--------是否同步：${code==AppConstant.SYNC_SUCCESS}")
         }
     }
 
@@ -66,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Hawk.put(AppConstant.TOKEN, "vwVXJ0CIatNMF9WvFXZvGcBHiiKaGbk0W7l0pMtlzIU=")//TODO
+        Hawk.put(AppConstant.TOKEN, "vwVXJ0CIatNMF9WvFXZvGd/8TdfINSvt/SrNr7XTDGQ=")//TODO
 
         ThbSyncHelper.init()
         PingAnSyncHelper.init()
@@ -79,25 +84,36 @@ class MainActivity : AppCompatActivity() {
         log = binding.log
         clean = binding.cleanLog
         log.movementMethod = ScrollingMovementMethod.getInstance()
-
-        info.text =
-            "是否插sim卡：${AppUtil.hasSIMCard(this)}；是否联网：${AppUtil.isConnected()}；平安是否同步：${PingAnSyncHelper.getToken() != null}；太保是否同步：${ThbSyncHelper.getTokenId() != null}；设备Id：${AppUtil.getUUID()}"
+        setText()
 
         binding.buttonFirst.setOnClickListener {
 //            openNpcAPP()
 //            startAct()
 //            testSync()
-            buildMessage(AppConstant.APP_EDIT)
+//            buildMessage(AppConstant.APP_EDIT)
+//            exec(AppConstant.REBOOT)
+
+//            val pManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+//            pManager.reboot(null) //重启
+
+
+
+
 
         }
         clean.setOnClickListener {
             sb.clear()
             log.text = ""
         }
+    }
 
+    private fun setText(){
+        info.text ="是否插sim卡：${AppUtil.hasSIMCard(this)}；是否联网：${AppUtil.isConnected()}；平安是否同步：${PingAnSyncHelper.getToken() != null}；太保是否同步：${ThbSyncHelper.getTokenId() != null}；设备Id：${AppUtil.getUUID()}"
     }
 
     private fun buildMessage(action: String) {
+        hhbStatus = if(PingAnSyncHelper.getToken() != null) AppConstant.SYNC_SUCCESS else AppConstant.SYNC_FAIL
+        thbStatus = if(ThbSyncHelper.getTokenId() != null) AppConstant.SYNC_SUCCESS else AppConstant.SYNC_FAIL
         val status = if (AppUtil.hasSIMCard(this)) 1 else 0
 
         val orgClueSync = listOf(
@@ -182,14 +198,14 @@ class MainActivity : AppCompatActivity() {
                                         PingAnSyncHelper.handleUpload()
                                     }
                                 } else {//太伙伴
-                                    val acc = json.getString("acc")
-                                    val pwd = json.getString("pwd")
-                                    val tokenId = json.getString("tokenId")
-                                    val deviceEnc = json.getString("deviceEnc")
-                                    val branchCode = json.getString("branchCode")
-                                    val vehicleCode = json.getString("vehicleCode")
-                                    val vehicleName = json.getString("vehicleName")
-                                    val vehicleLevel = json.getString("vehicleLevel")
+                                    val acc = data.getString("acc")
+                                    val pwd = data.getString("pwd")
+                                    val tokenId = data.getString("tokenId")
+                                    val deviceEnc = data.getString("deviceEnc")
+                                    val branchCode = data.getString("branchCode")
+                                    val vehicleCode = data.getString("vehicleCode")
+                                    val vehicleName = data.getString("vehicleName")
+                                    val vehicleLevel = data.getString("vehicleLevel")
 
                                     ThbSyncHelper.setInfo(
                                         acc = acc,
@@ -242,10 +258,10 @@ class MainActivity : AppCompatActivity() {
 
             override fun onError(ex: Exception?) {
                 super.onError(ex)
-                val msg = "websocket连接错误"
+//                val msg = "websocket连接错误"
 //                sb.append(msg+"\n")
 //                log.text = sb
-                Log.e(TAG, "$msg：$ex")
+//                Log.e(TAG, "$msg：$ex")
             }
 
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
@@ -336,13 +352,13 @@ class MainActivity : AppCompatActivity() {
                     Log.i(TAG, "websocket连接关闭,开始重连")
                     reconnectWs() //心跳机制发现断开开启重连
                 } else {
-                    Log.i(TAG, "心跳包检测websocket连接状态-->" + client!!.isOpen.toString())
+                    Log.i(TAG, "心跳检测websocket连接状态-->" + client!!.isOpen.toString())
                     GlobalScope.launch {
                         sendMsg(AppConstant.HEARTBEAT)
                     }
                 }
             } else {
-                Log.i(TAG, "心跳包检测websocket连接状态重新连接")
+                Log.i(TAG, "心跳检测websocket连接状态重新连接")
                 //如果client已为空，重新初始化连接
                 client = null
                 initWebSocket()
