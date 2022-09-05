@@ -37,14 +37,14 @@ interface CblApi {
     /**
      * Chb同步
      */
-    @POST("v1/clue/add/cooper_shop/by_chb")
-    suspend fun addByChb(@Body req: List<ChbSyncReq>): CommonResponse<List<PushMessageInfo>>
+    @POST("v1/clue/add/cooper_shop/by_board_chb")
+    suspend fun addByChb(@Body req: ChbData): CommonResponse<List<PushMessageInfo>>
 
     /**
      * 平安同步
      */
-    @POST("v1/clue/add/cooper_shop/by_hhb")
-    suspend fun addByPingAn(@Body req: List<HhbSyncReq>): CommonResponse<List<PushMessageInfo>>
+    @POST("v1/clue/add/cooper_shop/by_board_hhb")
+    suspend fun addByPingAn(@Body req:HhbData): CommonResponse<List<PushMessageInfo>>
 
     /**
      * Chb登录加密

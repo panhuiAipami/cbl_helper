@@ -46,16 +46,16 @@ object CblAPiRepository {
      * Chb同步
      * @param contents
      */
-    suspend fun addByChb(contents: List<ChbSyncReq>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
-        coroutineApiCall { mCblApi.addByChb(contents) }
+    suspend fun addByChb(deviceCode:String,userId:String,contents: List<ChbSyncReq>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
+        coroutineApiCall { mCblApi.addByChb(ChbData(deviceCode = deviceCode,userId = userId,syncParamChb = contents)) }
     }
 
     /**
      * 平安同步
      * @param contents
      */
-    suspend fun addByPingAn(contents: List<HhbSyncReq>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
-        coroutineApiCall { mCblApi.addByPingAn(contents) }
+    suspend fun addByPingAn(deviceCode:String,userId:String,contents: List<HhbSyncReq>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
+        coroutineApiCall { mCblApi.addByPingAn(HhbData(deviceCode = deviceCode,userId = userId,syncParamHhb = contents)) }
     }
 
     /**

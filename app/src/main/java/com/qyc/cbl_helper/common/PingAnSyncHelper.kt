@@ -11,6 +11,7 @@ import com.qyc.cbl_helper.callback.CallBackSyncStatus
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.http.request.HhbSyncReq
 import com.qyc.cbl_helper.repository.CblAPiRepository
+import com.qyc.cbl_helper.util.AppUtil
 import com.qyc.cbl_helper.websocket.JWebSocketClient
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
@@ -29,12 +30,16 @@ object PingAnSyncHelper {
     /** 本地存储Key - mIsOpen */
     private const val LS_KEY_IS_OPEN = "ls_key_ping_an_is_open"
 
+    /** 本地存储Key - mUserId */
+    const val LS_KEY_USER_ID = "ls_key_user_id"
+
     private const val LS_KEY_PINGAN_LAST_SYNC_TIME = "ls_key_pingAn_last_sync_time"
     private val pattern: String = "yyyy-MM-dd HH:mm:ss"
     private val format: SimpleDateFormat = SimpleDateFormat(pattern);
 
     private var mToken: String? = null
     private var mPhone: String? = null
+    private lateinit var mUserId: String
     private var mIsOpen: Boolean = false
     private lateinit var callBack: CallBackSyncStatus
 
@@ -48,10 +53,13 @@ object PingAnSyncHelper {
         if (null == mPhone) {
             mPhone = Hawk.get<String>(LS_KEY_PHONE)
         }
+        mUserId = Hawk.get<String>(LS_KEY_USER_ID,"")
+
         mIsOpen = Hawk.get<Boolean>(LS_KEY_IS_OPEN, false)
     }
 
     fun getToken(): String? = mToken
+    fun getUserId(): String = mUserId
     fun getPhone(): String? = mPhone
     fun getIsOpen(): Boolean = mIsOpen
 
@@ -72,21 +80,21 @@ object PingAnSyncHelper {
 
     fun setInfo(
         token: String?,
-        phone: String?,
+        userId: String,
         isOpen: Boolean
     ) {
         mToken = token
-        mPhone = phone
+        mUserId = userId
         mIsOpen = isOpen
         if (token.isNullOrBlank()) {
             Hawk.delete(LS_KEY_TOKEN)
         } else {
             Hawk.put(LS_KEY_TOKEN, token)
         }
-        if (phone.isNullOrBlank()) {
-            Hawk.delete(LS_KEY_PHONE)
+        if (userId.isBlank()) {
+            Hawk.delete(LS_KEY_USER_ID)
         } else {
-            Hawk.put(LS_KEY_PHONE, mPhone)
+            Hawk.put(LS_KEY_USER_ID, mUserId)
         }
 
         Hawk.put(LS_KEY_IS_OPEN, isOpen)
@@ -180,7 +188,7 @@ object PingAnSyncHelper {
                         var upLoadSuccess = true
                         if (uploadData.isNotEmpty()) {
                             try {
-                                CblAPiRepository.addByPingAn(uploadData)
+                                CblAPiRepository.addByPingAn(AppUtil.getUUID(), mUserId,uploadData)
                             } catch (e: Exception) {
                                 upLoadSuccess = false
                                 Log.e(
@@ -237,7 +245,7 @@ object PingAnSyncHelper {
     }
 
     fun clearAllInfo(code:Int) {
-        setInfo(null, mPhone, mIsOpen)
+        setInfo(null, "", mIsOpen)
         callBack.syncStatus(TpAppTypeEnum.HHB,code)
     }
 

@@ -5,6 +5,7 @@ import android.os.Handler
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.orhanobut.hawk.Hawk
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     var TAG = "MainActivity"
     var client: JWebSocketClient? = null
     private var BASE_URL =
-        if (AppConstant.DEBUG) "192.168.9.195:8080/ssss" else "test-qyc-bxgj.cpocar.cn"
+        if (AppConstant.DEBUG) "test-lark.cpocar.cn/ssss" else "test-qyc-bxgj.cpocar.cn"
     private var wsUrl = "ws://$BASE_URL"
     private lateinit var binding: ActivityMainBinding
     var sb: StringBuilder = StringBuilder()
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     private var mCallBack = object : CallBackSyncStatus {
         override fun syncStatus(type: TpAppTypeEnum, code: Int) {
+            Log.i(TAG, "$type------syncStatus--------是否同步：${code==AppConstant.SYNC_SUCCESS}")
             when (type) {
                 TpAppTypeEnum.THB -> {
                     if (code != AppConstant.SYNC_SUCCESS) {
@@ -62,7 +64,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             setText()
-            Log.i(TAG, "$type------syncStatus--------是否同步：${code==AppConstant.SYNC_SUCCESS}")
         }
     }
 
@@ -71,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Hawk.put(AppConstant.TOKEN, "vwVXJ0CIatNMF9WvFXZvGd/8TdfINSvt/SrNr7XTDGQ=")//TODO
+        Hawk.put(AppConstant.TOKEN, "vwVXJ0CIatNMF9WvFXZvGba1FbWZ6zQ97nyI14fzruM=")//TODO
 
         ThbSyncHelper.init()
         PingAnSyncHelper.init()
@@ -89,16 +90,12 @@ class MainActivity : AppCompatActivity() {
         binding.buttonFirst.setOnClickListener {
 //            openNpcAPP()
 //            startAct()
-//            testSync()
+            testSync()
 //            buildMessage(AppConstant.APP_EDIT)
 //            exec(AppConstant.REBOOT)
 
 //            val pManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 //            pManager.reboot(null) //重启
-
-
-
-
 
         }
         clean.setOnClickListener {
@@ -149,11 +146,26 @@ class MainActivity : AppCompatActivity() {
     fun testSync() {
         GlobalScope.launch(Dispatchers.IO) {
             PingAnSyncHelper.setInfo(
-                "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1wIiwiaWF0IjoxNjYxMjQ1OTI4LCJzdWIiOiJ7XCJjaGFubmVsQ29kZVwiOlwiUE1TXCIsXCJjaXR5Q29kZVwiOlwiMTEwMTAwXCIsXCJkZXB0Q29kZVwiOlwiMjAxNTFcIixcIm9sZENvZGVzXCI6W3tcIm9sZENvZGVcIjpcIjIwMTIxMDkxMjAwNlwiLFwib2xkQ29kZVR5cGVcIjpcIjAxXCJ9XSxcInJvbGVDb2Rlc1wiOltcImFkbXBfdGVuZW1lbnRfZ2VuZXJhbF9tYW5hZ2VyXCJdLFwidGVsZXBob25lXCI6XCIwRjUwRTA0NDA1Mzk3Q0VDRUJDNTBDREYwRjk2MEYwRFwiLFwidGVuZW1lbnRDb2RlXCI6XCIyMDEyMTA5MTIwMDZcIixcInRlbmVtZW50TmFtZVwiOlwi5YyX5Lqs5YyX5pa556aP55Ge5rG96L2m6ZSA5ZSu5pyN5Yqh5pyJ6ZmQ5YWs5Y-4XCIsXCJ0ZW5lbWVudFR5cGVcIjpcIjEwMVwiLFwidXNlckNvZGVcIjpcIllFRlNQLTY3NzIyXCIsXCJ1c2VyTmFtZVwiOlwi5YWo5LyY6L2m5rWL6K-V5py6b3Bwb1wifSIsImp0aSI6IjIyMDgyMzE3MTUwODUwNTcyMjYyNDQyIiwiZXhwIjoxNjYzODM3OTI4LCJuYmYiOjE2NjEyNDU5Mjh9.9JzwlevyGQYJGCVMh5iI-ADdzdmzXAcVPiqR131Ptqc",
+                "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1wIiwiaWF0IjoxNjYyMDk5OTIwLCJzdWIiOiJ7XCJjaGFubmVsQ29kZVwiOlwiUE1TXCIsXCJjaXR5Q29kZVwiOlwiMTEwMTAwXCIsXCJkZXB0Q29kZVwiOlwiMjAxNTFcIixcIm9sZENvZGVzXCI6W3tcIm9sZENvZGVcIjpcIjIwMTIxMDkxMjAwNlwiLFwib2xkQ29kZVR5cGVcIjpcIjAxXCJ9XSxcInJvbGVDb2Rlc1wiOltcImFkbXBfdGVuZW1lbnRfZ2VuZXJhbF9tYW5hZ2VyXCJdLFwidGVsZXBob25lXCI6XCIwRjUwRTA0NDA1Mzk3Q0VDRUJDNTBDREYwRjk2MEYwRFwiLFwidGVuZW1lbnRDb2RlXCI6XCIyMDEyMTA5MTIwMDZcIixcInRlbmVtZW50TmFtZVwiOlwi5YyX5Lqs5YyX5pa556aP55Ge5rG96L2m6ZSA5ZSu5pyN5Yqh5pyJ6ZmQ5YWs5Y-4XCIsXCJ0ZW5lbWVudFR5cGVcIjpcIjEwMVwiLFwidXNlckNvZGVcIjpcIllFRlNQLTY3NzIyXCIsXCJ1c2VyTmFtZVwiOlwi5YWo5LyY6L2m5rWL6K-V5py6b3Bwb1wifSIsImp0aSI6IjIyMDkwMjE0MjgyMDM2MGY0MTkwMDcxIiwiZXhwIjoxNjY0NjkxOTIwLCJuYmYiOjE2NjIwOTk5MjB9.o5m_OCkNdA3pDYFTs_2MaOz2yCSjRRfjgKo-56ViEDY",
                 "",
                 true
             )
             PingAnSyncHelper.handleUpload()
+
+
+//            ThbSyncHelper.setInfo(
+//                userId = "100000129",
+//                acc = "w_bffr_gl",
+//                pwd = "Cpic12345",
+//                tokenId = "a9a729e9961d391fa4cfc2fab2748d31e2d3017572ad108ccdfa602302722536",
+//                deviceEnc = "Xv6zlHoscDb6+5wXOreWXQYVMcs08ozvW0k1ZQ5ow0I3CBHed+L2CPZglnJ4Fkwh",
+//                branchCode = "1010100",
+//                vehicleCode = "4SF30339",
+//                vehicleName = "北京北方福瑞汽车销售服务有限公司",
+//                vehicleLevel = "B"
+//            )
+//            ThbSyncHelper.setOpenSync(true)
+//            ThbSyncHelper.handleUpload()
         }
     }
 
@@ -191,9 +203,10 @@ class MainActivity : AppCompatActivity() {
                             AppConstant.APP_LOGIN -> {
                                 val data = json.getJSONObject("data")
                                 val hasToken = data.has("token")
+                                val userId = data.getString("userId")
                                 if (hasToken) {//好伙伴
                                     val token = data.getString("token")
-                                    PingAnSyncHelper.setInfo(token, "", true)
+                                    PingAnSyncHelper.setInfo(token, userId, true)
                                     GlobalScope.launch(Dispatchers.IO) {
                                         PingAnSyncHelper.handleUpload()
                                     }
@@ -208,6 +221,7 @@ class MainActivity : AppCompatActivity() {
                                     val vehicleLevel = data.getString("vehicleLevel")
 
                                     ThbSyncHelper.setInfo(
+                                        userId = userId,
                                         acc = acc,
                                         pwd = pwd,
                                         tokenId = tokenId,
@@ -218,6 +232,7 @@ class MainActivity : AppCompatActivity() {
                                         vehicleLevel = vehicleLevel
                                     )
                                     ThbSyncHelper.setOpenSync(true)
+                                    ThbSyncHelper.setManualLoginFlag(false)
                                     GlobalScope.launch(Dispatchers.IO) {
                                         ThbSyncHelper.handleUpload()
                                     }
@@ -226,7 +241,9 @@ class MainActivity : AppCompatActivity() {
 
                             //重启
                             AppConstant.APP_RESTART -> {
-                                exec(AppConstant.REBOOT)
+                                Log.e("a","--------APP_RESTART--------->")
+                                reStartDevice()
+//                                exec(AppConstant.REBOOT)
                             }
                             //关闭同步
                             AppConstant.APP_CLOSE_SYNC -> {
@@ -258,10 +275,10 @@ class MainActivity : AppCompatActivity() {
 
             override fun onError(ex: Exception?) {
                 super.onError(ex)
-//                val msg = "websocket连接错误"
+                val msg = "websocket连接错误"
 //                sb.append(msg+"\n")
 //                log.text = sb
-//                Log.e(TAG, "$msg：$ex")
+                Log.e(TAG, "$msg：$ex")
             }
 
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
@@ -370,6 +387,16 @@ class MainActivity : AppCompatActivity() {
 
     companion object { //每隔10秒进行一次对长连接的心跳检测
         private const val HEART_BEAT_RATE = (30 * 1000).toLong()
+    }
+
+    private fun reStartDevice(){
+        try {
+            Runtime.getRuntime().exec("su");
+            Runtime.getRuntime().exec("reboot");
+        } catch (e: java.lang.Exception) {
+            Toast.makeText(applicationContext, "Error! Fail to reboot.", Toast.LENGTH_SHORT)
+                .show()
+        }
     }
 
     /**

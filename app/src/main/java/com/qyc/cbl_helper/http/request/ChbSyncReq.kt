@@ -1,5 +1,16 @@
 package com.qyc.cbl_helper.http.request
 
+data class ChbData(
+    val deviceCode:String?,
+    val userId:String?,
+    val syncParamChb:List<ChbSyncReq>
+)
+data class HhbData(
+    val deviceCode:String?,
+    val userId:String?,
+    val syncParamHhb:List<HhbSyncReq>
+)
+
 data class ChbSyncReq(
     val licensePlate: String?,
     val reportUserName: String?,

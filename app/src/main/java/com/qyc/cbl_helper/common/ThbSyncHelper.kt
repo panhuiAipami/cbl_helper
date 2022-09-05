@@ -62,6 +62,7 @@ object ThbSyncHelper {
     private var mVehicleName: String? = null
     private var mVehicleLevel: String? = null
     private var reLoginCount: Int = 0
+    private lateinit var mUserId: String
 
     private lateinit var callBack: CallBackSyncStatus
 
@@ -92,6 +93,7 @@ object ThbSyncHelper {
         if (null == mVehicleLevel) {
             mVehicleLevel = Hawk.get<String>(LS_KEY_VEHICLE_LEVEL)
         }
+        mUserId = Hawk.get<String>(PingAnSyncHelper.LS_KEY_USER_ID,"")
     }
 
     fun getTokenId(): String? = mTokenId
@@ -114,6 +116,7 @@ object ThbSyncHelper {
     }
 
     fun setInfo(
+        userId:String,
         acc: String?,
         pwd: String?,
         tokenId: String?,
@@ -123,6 +126,7 @@ object ThbSyncHelper {
         vehicleName: String?,
         vehicleLevel: String?
     ) {
+        mUserId = userId
         mAcc = acc
         mPwd = pwd
         mTokenId = tokenId
@@ -170,6 +174,11 @@ object ThbSyncHelper {
             Hawk.delete(LS_KEY_VEHICLE_LEVEL)
         } else {
             Hawk.put(LS_KEY_VEHICLE_LEVEL, mVehicleLevel)
+        }
+        if (userId.isBlank()) {
+            Hawk.delete(PingAnSyncHelper.LS_KEY_USER_ID)
+        } else {
+            Hawk.put(PingAnSyncHelper.LS_KEY_USER_ID, mUserId)
         }
     }
 
@@ -266,8 +275,10 @@ object ThbSyncHelper {
                             Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() ReLogin fail e：${e.message}")
                         }
                     }
-                    // 弹个重新登录吧
-                    setManualLoginFlag(true)
+                    if(reLoginCount>=3) {
+                        // 弹个重新登录吧
+                        setManualLoginFlag(true)
+                    }
                     PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.THB)
                     clearAllInfo()
                 } else {
@@ -316,11 +327,11 @@ object ThbSyncHelper {
                         var hasUploadSuc = false
                         if (uploadData.isNotEmpty()) {
                             try {
-                                val uploadResPushMsgList = CblAPiRepository.addByChb(uploadData)
+                                val uploadResPushMsgList = CblAPiRepository.addByChb(AppUtil.getUUID(),mUserId,uploadData)
                                 hasUploadSuc = true
                                 uploadResPushMsgList
                             } catch (e: Exception) {
-                                Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() call addByChb fail e：${e.message}")
+                                Log.e(AppConstant.TAG_CHB_SYNC, "handleUpload() call addByChb fail e：${e.message}")
                                 null
                             }?.forEach { pushMsg ->
                                 PushMessageNotificationHelper.showNewClueNotify(pushMsg)
@@ -353,7 +364,7 @@ object ThbSyncHelper {
     }
 
     private fun clearAllInfo() {
-        setInfo(mAcc, mPwd, null, null, null, null, null, null)
+        setInfo("",mAcc, mPwd, null, null, null, null, null, null)
 
         callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_FAIL)
     }
