@@ -4,6 +4,7 @@ import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import com.qyc.cbl_helper.constant.AppConstant
+import com.qyc.cbl_helper.repository.CblAPiRepository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -61,11 +62,11 @@ object SamplingHelper {
         if (!TextUtils.isEmpty(customParams)) {
             finalCustomParams = "&$customParams"
         }
-        val finalParams = "platform=ANDROIDAPP&url=$url$finalEvent&sv=$sysVersion&bv=$brandVersion&adt=${Build.MODEL}&brand=$brand}$finalCustomParams"
+        val finalParams = "platform=DevBoard&url=$url$finalEvent&sv=$sysVersion&bv=$brandVersion&adt=${Build.MODEL}&brand=$brand}$finalCustomParams"
         Log.i(AppConstant.TAG_COMMON, "sampling() params：$finalParams")
         GlobalScope.launch(Dispatchers.IO) {
             try {
-//                CblAPiRepository.sampling(finalParams)
+                CblAPiRepository.sampling(finalParams)
             } catch (e: Exception) {
             }
         }

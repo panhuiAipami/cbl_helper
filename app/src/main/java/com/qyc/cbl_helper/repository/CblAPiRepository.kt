@@ -5,6 +5,7 @@ import com.qyc.cbl_helper.http.CblApi
 import com.qyc.cbl_helper.http.CblApiService
 import com.qyc.cbl_helper.model.ChbLoginEncInfo
 import cn.cpocar.qyc_cbl.model.ShopConfInfo
+import com.qyc.cbl_helper.common.PingAnSyncHelper
 import com.qyc.cbl_helper.http.coroutineApiCall
 import com.qyc.cbl_helper.http.coroutineApiCallBase
 import com.qyc.cbl_helper.http.request.*
@@ -13,6 +14,7 @@ import com.qyc.cbl_helper.http.request.ChbSyncReq
 import com.qyc.cbl_helper.http.request.HhbSyncReq
 import com.qyc.cbl_helper.http.request.SmsSyncReqItemInfo
 import com.qyc.cbl_helper.model.PushMessageInfo
+import com.qyc.cbl_helper.util.AppUtil
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,7 +41,7 @@ object CblAPiRepository {
      * @return List<PushMessageInfo>
      */
     suspend fun addCooperShopClueBySms(contents: List<SmsSyncReqItemInfo>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
-        coroutineApiCall { mCblApi.smsSync(contents) }
+        coroutineApiCall { mCblApi.smsSync(SmsData(deviceCode = AppUtil.getUUID(),userId = PingAnSyncHelper.getUserId(),list = contents)) }
     }
 
     /**
@@ -47,7 +49,7 @@ object CblAPiRepository {
      * @param contents
      */
     suspend fun addByChb(deviceCode:String,userId:String,contents: List<ChbSyncReq>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
-        coroutineApiCall { mCblApi.addByChb(ChbData(deviceCode = deviceCode,userId = userId,syncParamChb = contents)) }
+        coroutineApiCall { mCblApi.addByChb(ChbData(deviceCode = deviceCode,userId = userId,list = contents)) }
     }
 
     /**
@@ -55,7 +57,7 @@ object CblAPiRepository {
      * @param contents
      */
     suspend fun addByPingAn(deviceCode:String,userId:String,contents: List<HhbSyncReq>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
-        coroutineApiCall { mCblApi.addByPingAn(HhbData(deviceCode = deviceCode,userId = userId,syncParamHhb = contents)) }
+        coroutineApiCall { mCblApi.addByPingAn(HhbData(deviceCode = deviceCode,userId = userId,list = contents)) }
     }
 
     /**

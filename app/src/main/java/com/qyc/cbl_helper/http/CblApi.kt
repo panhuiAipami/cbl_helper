@@ -31,8 +31,8 @@ interface CblApi {
     /**
      * 保司短信同步
      */
-    @POST("v1/clue/add/cooper_shop/by_sms_v2")
-    suspend fun smsSync(@Body req: List<SmsSyncReqItemInfo>): CommonResponse<List<PushMessageInfo>>
+    @POST("v1/clue/add/cooper_shop/by_board_sms_v2")
+    suspend fun smsSync(@Body req: SmsData): CommonResponse<List<PushMessageInfo>>
 
     /**
      * Chb同步

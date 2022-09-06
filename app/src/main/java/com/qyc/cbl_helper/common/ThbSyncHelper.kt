@@ -97,6 +97,7 @@ object ThbSyncHelper {
     }
 
     fun getTokenId(): String? = mTokenId
+    fun getUserId(): String = mUserId
     fun getAcc(): String? = mAcc
     fun getPwd(): String? = mPwd
     fun getDeviceEnc(): String? = mDeviceEnc

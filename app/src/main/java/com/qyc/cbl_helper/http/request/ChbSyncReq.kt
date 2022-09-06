@@ -1,14 +1,20 @@
 package com.qyc.cbl_helper.http.request
 
+data class SmsData(
+    val deviceCode:String?,
+    val userId:String?,
+    val list:List<SmsSyncReqItemInfo>
+)
+
 data class ChbData(
     val deviceCode:String?,
     val userId:String?,
-    val syncParamChb:List<ChbSyncReq>
+    val list:List<ChbSyncReq>
 )
 data class HhbData(
     val deviceCode:String?,
     val userId:String?,
-    val syncParamHhb:List<HhbSyncReq>
+    val list:List<HhbSyncReq>
 )
 
 data class ChbSyncReq(

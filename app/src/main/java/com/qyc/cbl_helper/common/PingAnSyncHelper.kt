@@ -53,7 +53,7 @@ object PingAnSyncHelper {
         if (null == mPhone) {
             mPhone = Hawk.get<String>(LS_KEY_PHONE)
         }
-        mUserId = Hawk.get<String>(LS_KEY_USER_ID,"")
+        mUserId = Hawk.get<String>(LS_KEY_USER_ID,"100000129")
 
         mIsOpen = Hawk.get<Boolean>(LS_KEY_IS_OPEN, false)
     }
