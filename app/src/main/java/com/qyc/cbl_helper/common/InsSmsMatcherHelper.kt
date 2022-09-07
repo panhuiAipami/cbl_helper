@@ -12,10 +12,10 @@ object InsSmsMatcherHelper {
 
     private val defMatchers: List<String> by lazy {
         arrayListOf(
-                "【([\\u4e00-\\u9fa5]+(财险|保险|产险))】",
-                "\\\\[([\\u4e00-\\u9fa5]+(财险|保险|产险))\\\\]",
-                "【(中国平安)】",
-                "【(中国太平)】"
+            "【([\\u4e00-\\u9fa5]+(财险|保险|产险))】",
+            "\\\\[([\\u4e00-\\u9fa5]+(财险|保险|产险))\\\\]",
+            "【(中国平安)】",
+            "【(中国太平)】"
         )
     }
     private val matchers = arrayListOf<String>()
@@ -25,16 +25,29 @@ object InsSmsMatcherHelper {
 
     suspend fun updateData() {
         matchers.clear()
-
-        // 1. 获取最后的服务器缓存
-        val cacheMatchers = Hawk.get<List<String>>(LS_KEY_MATCHER_CACHE)
-        if (null != cacheMatchers && cacheMatchers.isNotEmpty()) {
-            matcherType = "服务器缓存(${cacheMatchers.size})"
-            matchers.addAll(cacheMatchers)
+        val result = try {
+            CblAPiRepository.insSmsFeatureMatchers()
+        } catch (e: Exception) {
+            null
+        }
+        if (null != result) {
+            // 从网络上获取到了配置
+            isLoadNetworkMatchersSuc = true
+            Hawk.put(LS_KEY_MATCHER_CACHE, result)
+            matcherType = "线上配置(${result.size})"
+            matchers.addAll(result)
+            lastLoadNetMillisecond = System.currentTimeMillis()
         } else {
-            // 2. 上面缓存为空，就取本地写死的
-            matcherType = "本地缓存(${defMatchers.size})"
-            matchers.addAll(defMatchers)
+            // 1. 获取最后的服务器缓存
+            val cacheMatchers = Hawk.get<List<String>>(LS_KEY_MATCHER_CACHE)
+            if (null != cacheMatchers && cacheMatchers.isNotEmpty()) {
+                matcherType = "服务器缓存(${cacheMatchers.size})"
+                matchers.addAll(cacheMatchers)
+            } else {
+                // 2. 上面缓存为空，就取本地写死的
+                matcherType = "本地缓存(${defMatchers.size})"
+                matchers.addAll(defMatchers)
+            }
         }
         Log.i(TAG_SMS_SYNC, "init sms matchers [$matcherType]")
     }

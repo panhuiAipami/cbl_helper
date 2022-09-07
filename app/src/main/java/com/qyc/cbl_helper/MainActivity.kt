@@ -34,8 +34,8 @@ class MainActivity : AppCompatActivity() {
     var TAG = "MainActivity"
     var client: JWebSocketClient? = null
     private var BASE_URL =
-        if (AppConstant.DEBUG) "test-lark.cpocar.cn/ssss" else "test-qyc-bxgj.cpocar.cn"
-    private var wsUrl = "ws://$BASE_URL"
+        if (AppConstant.DEBUG) "test-op.cpocar.cn/api/v1/board/ws" else "cbl.qyccar.com/api/v1/board/ws"
+    private var wsUrl = "wss://$BASE_URL"
     private lateinit var binding: ActivityMainBinding
     var sb: StringBuilder = StringBuilder()
     var thbStatus: Int = 0
@@ -90,18 +90,23 @@ class MainActivity : AppCompatActivity() {
         binding.buttonFirst.setOnClickListener {
 //            openNpcAPP()
 //            startAct()
-            testSync()
+//            testSync()
 //            buildMessage(AppConstant.APP_EDIT)
 //            exec(AppConstant.REBOOT)
 
 //            val pManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 //            pManager.reboot(null) //重启
+//            disconnect()
 
         }
         clean.setOnClickListener {
             sb.clear()
             log.text = ""
         }
+    }
+
+    private fun disconnect() {
+        client?.closeBlocking()
     }
 
     private fun setText(){
@@ -145,27 +150,27 @@ class MainActivity : AppCompatActivity() {
      */
     fun testSync() {
         GlobalScope.launch(Dispatchers.IO) {
-            PingAnSyncHelper.setInfo(
-                "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1wIiwiaWF0IjoxNjYyMDk5OTIwLCJzdWIiOiJ7XCJjaGFubmVsQ29kZVwiOlwiUE1TXCIsXCJjaXR5Q29kZVwiOlwiMTEwMTAwXCIsXCJkZXB0Q29kZVwiOlwiMjAxNTFcIixcIm9sZENvZGVzXCI6W3tcIm9sZENvZGVcIjpcIjIwMTIxMDkxMjAwNlwiLFwib2xkQ29kZVR5cGVcIjpcIjAxXCJ9XSxcInJvbGVDb2Rlc1wiOltcImFkbXBfdGVuZW1lbnRfZ2VuZXJhbF9tYW5hZ2VyXCJdLFwidGVsZXBob25lXCI6XCIwRjUwRTA0NDA1Mzk3Q0VDRUJDNTBDREYwRjk2MEYwRFwiLFwidGVuZW1lbnRDb2RlXCI6XCIyMDEyMTA5MTIwMDZcIixcInRlbmVtZW50TmFtZVwiOlwi5YyX5Lqs5YyX5pa556aP55Ge5rG96L2m6ZSA5ZSu5pyN5Yqh5pyJ6ZmQ5YWs5Y-4XCIsXCJ0ZW5lbWVudFR5cGVcIjpcIjEwMVwiLFwidXNlckNvZGVcIjpcIllFRlNQLTY3NzIyXCIsXCJ1c2VyTmFtZVwiOlwi5YWo5LyY6L2m5rWL6K-V5py6b3Bwb1wifSIsImp0aSI6IjIyMDkwMjE0MjgyMDM2MGY0MTkwMDcxIiwiZXhwIjoxNjY0NjkxOTIwLCJuYmYiOjE2NjIwOTk5MjB9.o5m_OCkNdA3pDYFTs_2MaOz2yCSjRRfjgKo-56ViEDY",
-                "",
-                true
-            )
-            PingAnSyncHelper.handleUpload()
-
-
-//            ThbSyncHelper.setInfo(
-//                userId = "100000129",
-//                acc = "w_bffr_gl",
-//                pwd = "Cpic12345",
-//                tokenId = "a9a729e9961d391fa4cfc2fab2748d31e2d3017572ad108ccdfa602302722536",
-//                deviceEnc = "Xv6zlHoscDb6+5wXOreWXQYVMcs08ozvW0k1ZQ5ow0I3CBHed+L2CPZglnJ4Fkwh",
-//                branchCode = "1010100",
-//                vehicleCode = "4SF30339",
-//                vehicleName = "北京北方福瑞汽车销售服务有限公司",
-//                vehicleLevel = "B"
+//            PingAnSyncHelper.setInfo(
+//                "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1wIiwiaWF0IjoxNjYyMDk5OTIwLCJzdWIiOiJ7XCJjaGFubmVsQ29kZVwiOlwiUE1TXCIsXCJjaXR5Q29kZVwiOlwiMTEwMTAwXCIsXCJkZXB0Q29kZVwiOlwiMjAxNTFcIixcIm9sZENvZGVzXCI6W3tcIm9sZENvZGVcIjpcIjIwMTIxMDkxMjAwNlwiLFwib2xkQ29kZVR5cGVcIjpcIjAxXCJ9XSxcInJvbGVDb2Rlc1wiOltcImFkbXBfdGVuZW1lbnRfZ2VuZXJhbF9tYW5hZ2VyXCJdLFwidGVsZXBob25lXCI6XCIwRjUwRTA0NDA1Mzk3Q0VDRUJDNTBDREYwRjk2MEYwRFwiLFwidGVuZW1lbnRDb2RlXCI6XCIyMDEyMTA5MTIwMDZcIixcInRlbmVtZW50TmFtZVwiOlwi5YyX5Lqs5YyX5pa556aP55Ge5rG96L2m6ZSA5ZSu5pyN5Yqh5pyJ6ZmQ5YWs5Y-4XCIsXCJ0ZW5lbWVudFR5cGVcIjpcIjEwMVwiLFwidXNlckNvZGVcIjpcIllFRlNQLTY3NzIyXCIsXCJ1c2VyTmFtZVwiOlwi5YWo5LyY6L2m5rWL6K-V5py6b3Bwb1wifSIsImp0aSI6IjIyMDkwMjE0MjgyMDM2MGY0MTkwMDcxIiwiZXhwIjoxNjY0NjkxOTIwLCJuYmYiOjE2NjIwOTk5MjB9.o5m_OCkNdA3pDYFTs_2MaOz2yCSjRRfjgKo-56ViEDY",
+//                "",
+//                true
 //            )
-//            ThbSyncHelper.setOpenSync(true)
-//            ThbSyncHelper.handleUpload()
+//            PingAnSyncHelper.handleUpload()
+
+
+            ThbSyncHelper.setInfo(
+                userId = "100000129",
+                acc = "w_bffr_gl",
+                pwd = "Cpic12345!",
+                tokenId = "a9a729e9961d391fa4cfc2fab2748d31e2d3017572ad108ccdfa602302722536",
+                deviceEnc = "Xv6zlHoscDb6+5wXOreWXQYVMcs08ozvW0k1ZQ5ow0I3CBHed+L2CPZglnJ4Fkwh",
+                branchCode = "1010100",
+                vehicleCode = "4SF30339",
+                vehicleName = "北京北方福瑞汽车销售服务有限公司",
+                vehicleLevel = "B"
+            )
+            ThbSyncHelper.setOpenSync(true)
+            ThbSyncHelper.handleUpload()
         }
     }
 

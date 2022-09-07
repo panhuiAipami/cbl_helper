@@ -81,7 +81,7 @@ object CblAPiRepository {
      * @return BaseResponse
      */
     suspend fun sampling(params: String): Boolean = withContext(Dispatchers.IO) {
-        coroutineApiCallBase { mCblApi.sampling("v1/sampling/put?${params}") }
+        coroutineApiCallBase { mCblApi.sampling("v1/sampling/board/put?${params}") }
     }
 
     /**

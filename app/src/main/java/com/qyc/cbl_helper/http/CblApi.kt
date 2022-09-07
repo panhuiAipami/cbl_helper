@@ -25,7 +25,7 @@ interface CblApi {
     /**
      * 保司短信初筛规则
      */
-    @GET("v1/sms/ins_sms_feature_matchers")
+    @GET("v1/sms/board/ins_sms_feature_matchers")
     suspend fun insSmsFeatureMatchers(): CommonResponse<List<String>>
 
     /**
