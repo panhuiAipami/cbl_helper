@@ -16,12 +16,12 @@ import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.TextUtils
-import android.text.TextUtils.isEmpty
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 
 import com.orhanobut.hawk.Hawk
@@ -30,6 +30,8 @@ import com.qyc.cbl_helper.NpsActivity
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.service.SmsSyncService
 import java.math.BigDecimal
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.math.abs
 
@@ -592,6 +594,14 @@ class AppUtil {
             val second = ((duration % (1000 * 60)) / 1000).toInt()
             return "${if (hour <= 0) "" else if (hour <= 9) "0$hour:" else "$hour:"}${if (minute <= 9) "0$minute" else "$minute"}:${if (second <= 9) "0$second" else "$second"}"
         }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getCurrentTime() :String{
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formatted = current.format(formatter)
+        return formatted.toString()
+    }
     }
 
 }

@@ -39,7 +39,7 @@ object PingAnSyncHelper {
 
     private var mToken: String? = null
     private var mPhone: String? = null
-    private lateinit var mUserId: String
+    private var mUserId: String = ""
     private var mIsOpen: Boolean = false
     private lateinit var callBack: CallBackSyncStatus
 

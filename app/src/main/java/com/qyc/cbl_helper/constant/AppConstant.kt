@@ -11,8 +11,8 @@ class AppConstant private constructor() {
 
         const val npsMain = "org.golang.app.GoNativeActivity"
         const val npsPackName = "org.nps.client"
-        const val cblMain = "cn.cpocar.qyc_cbl.MainActivity"
-        const val cblPackName = "cn.cpocar.qyc_cbl"
+        const val cblMain = "com.qyc.cbl_helper.MainActivity"
+        const val cblPackName = "com.qyc.cbl_helper"
 
         const val TOKEN = "app_token"
         const val MESSAGE_TYPE = "messageType"

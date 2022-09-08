@@ -1,5 +1,6 @@
 package com.qyc.cbl_helper
 
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.text.method.ScrollingMovementMethod
@@ -8,7 +9,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
-import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.callback.CallBackSyncStatus
 import com.qyc.cbl_helper.common.PingAnSyncHelper
 import com.qyc.cbl_helper.common.ThbSyncHelper
@@ -72,8 +72,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Hawk.put(AppConstant.TOKEN, "vwVXJ0CIatNMF9WvFXZvGba1FbWZ6zQ97nyI14fzruM=")//TODO
-
         ThbSyncHelper.init()
         PingAnSyncHelper.init()
         PingAnSyncHelper.setCallBack(mCallBack)
@@ -88,16 +86,13 @@ class MainActivity : AppCompatActivity() {
         setText()
 
         binding.buttonFirst.setOnClickListener {
-//            openNpcAPP()
+//            openNpcAPP(this)
 //            startAct()
 //            testSync()
 //            buildMessage(AppConstant.APP_EDIT)
-//            exec(AppConstant.REBOOT)
-
-//            val pManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-//            pManager.reboot(null) //重启
 //            disconnect()
 
+            reStartDevice()
         }
         clean.setOnClickListener {
             sb.clear()
@@ -200,7 +195,6 @@ class MainActivity : AppCompatActivity() {
                     log.text = sb
                     Log.i(TAG, "websocket收到消息：$message")
 
-
                     try {
                         val json = JSONObject(message)
                         val action = json.getString(AppConstant.MESSAGE_TYPE)
@@ -246,9 +240,7 @@ class MainActivity : AppCompatActivity() {
 
                             //重启
                             AppConstant.APP_RESTART -> {
-                                Log.e("a","--------APP_RESTART--------->")
                                 reStartDevice()
-//                                exec(AppConstant.REBOOT)
                             }
                             //关闭同步
                             AppConstant.APP_CLOSE_SYNC -> {
@@ -319,7 +311,9 @@ class MainActivity : AppCompatActivity() {
      */
     suspend fun sendMsg(msg: String) {
         if (null != client) {
-            sb.append(msg + "\n")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                sb.append(AppUtil.getCurrentTime()+"-->"+msg + "\n\n")
+            }
             if (client!!.isOpen) {
                 client!!.send(msg)
             }

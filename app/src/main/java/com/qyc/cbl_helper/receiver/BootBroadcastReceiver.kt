@@ -23,16 +23,19 @@ class BootBroadcastReceiver : BroadcastReceiver() {
         val action = intent.action
         val canSmsSync = PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
             MyApplication.getInstance(), Manifest.permission.READ_SMS)
-        Log.i(AppConstant.TAG_COMMON, "BootBroadcastReceiver > onReceive() _ action：$action _ canSmsSync：$canSmsSync")
-        SamplingHelper.sampling("BootBroadcastReceiver", "boot_broadcast", "action" to "$action", "canSmsSync" to "$canSmsSync")
-        if (action == Intent.ACTION_BOOT_COMPLETED && canSmsSync) {
-            val serIntent = Intent(context, SmsSyncService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(serIntent)
-            } else {
-                context.startService(serIntent)
+        if (action == Intent.ACTION_BOOT_COMPLETED) {
+            if (canSmsSync) {
+                val serIntent = Intent(context, SmsSyncService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(serIntent)
+                } else {
+                    context.startService(serIntent)
+                }
             }
-            AppUtil.startLaunchAPP(context, AppConstant.npsPackName,AppConstant.npsMain)
+            AppUtil.startLaunchAPP(context, AppConstant.cblPackName, AppConstant.cblMain)
+            AppUtil.startLaunchAPP(context, AppConstant.npsPackName, AppConstant.npsMain)
         }
+        Log.i(AppConstant.TAG_COMMON,"BootBroadcastReceiver > onReceive() _ action：$action _ canSmsSync：$canSmsSync")
+        SamplingHelper.sampling("BootBroadcastReceiver","boot_broadcast", "action" to "$action","canSmsSync" to "$canSmsSync")
     }
 }
