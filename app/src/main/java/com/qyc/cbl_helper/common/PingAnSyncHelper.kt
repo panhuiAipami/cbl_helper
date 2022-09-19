@@ -53,7 +53,7 @@ object PingAnSyncHelper {
         if (null == mPhone) {
             mPhone = Hawk.get<String>(LS_KEY_PHONE)
         }
-        mUserId = Hawk.get<String>(LS_KEY_USER_ID,"100000129")
+        mUserId = Hawk.get<String>(LS_KEY_USER_ID,"")
 
         mIsOpen = Hawk.get<Boolean>(LS_KEY_IS_OPEN, false)
     }
@@ -245,7 +245,7 @@ object PingAnSyncHelper {
     }
 
     fun clearAllInfo(code:Int) {
-        setInfo(null, "", mIsOpen)
+        setInfo(null, mUserId, mIsOpen)
         callBack.syncStatus(TpAppTypeEnum.HHB,code)
     }
 

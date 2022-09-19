@@ -319,6 +319,7 @@ class MainActivity : AppCompatActivity() {
             }
             withContext(Dispatchers.Main) {
                 log.text = sb
+                Log.i(TAG, "$msg")
             }
         }
     }

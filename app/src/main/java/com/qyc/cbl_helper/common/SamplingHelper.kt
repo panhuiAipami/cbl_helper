@@ -62,7 +62,8 @@ object SamplingHelper {
         if (!TextUtils.isEmpty(customParams)) {
             finalCustomParams = "&$customParams"
         }
-        val finalParams = "userId=${PingAnSyncHelper.getUserId()}&platform=DevBoard&url=$url$finalEvent&sv=$sysVersion&bv=$brandVersion&adt=${Build.MODEL}&brand=$brand$finalCustomParams"
+        val uid = PingAnSyncHelper.getUserId().ifBlank { ThbSyncHelper.getUserId()}
+        val finalParams = "userId=${uid}&platform=DevBoard&url=$url$finalEvent&sv=$sysVersion&bv=$brandVersion&adt=${Build.MODEL}&brand=$brand$finalCustomParams"
         Log.i(AppConstant.TAG_COMMON, "sampling() params：$finalParams")
         GlobalScope.launch(Dispatchers.IO) {
             try {

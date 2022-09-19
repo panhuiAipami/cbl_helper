@@ -62,7 +62,7 @@ object ThbSyncHelper {
     private var mVehicleName: String? = null
     private var mVehicleLevel: String? = null
     private var reLoginCount: Int = 0
-    private lateinit var mUserId: String
+    private var mUserId: String = ""
 
     private lateinit var callBack: CallBackSyncStatus
 
@@ -365,7 +365,7 @@ object ThbSyncHelper {
     }
 
     private fun clearAllInfo() {
-        setInfo("",mAcc, mPwd, null, null, null, null, null, null)
+        setInfo(mUserId,mAcc, mPwd, null, null, null, null, null, null)
 
         callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_FAIL)
     }

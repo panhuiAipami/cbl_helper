@@ -6,6 +6,7 @@ import com.qyc.cbl_helper.http.CblApiService
 import com.qyc.cbl_helper.model.ChbLoginEncInfo
 import cn.cpocar.qyc_cbl.model.ShopConfInfo
 import com.qyc.cbl_helper.common.PingAnSyncHelper
+import com.qyc.cbl_helper.common.ThbSyncHelper
 import com.qyc.cbl_helper.http.coroutineApiCall
 import com.qyc.cbl_helper.http.coroutineApiCallBase
 import com.qyc.cbl_helper.http.request.*
@@ -41,7 +42,8 @@ object CblAPiRepository {
      * @return List<PushMessageInfo>
      */
     suspend fun addCooperShopClueBySms(contents: List<SmsSyncReqItemInfo>): List<PushMessageInfo> = withContext(Dispatchers.IO) {
-        coroutineApiCall { mCblApi.smsSync(SmsData(deviceCode = AppUtil.getUUID(),userId = PingAnSyncHelper.getUserId(),list = contents)) }
+        val uid = PingAnSyncHelper.getUserId().ifBlank { ThbSyncHelper.getUserId()}
+        coroutineApiCall { mCblApi.smsSync(SmsData(deviceCode = AppUtil.getUUID(),userId = uid,list = contents)) }
     }
 
     /**
