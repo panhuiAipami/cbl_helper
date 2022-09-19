@@ -32,7 +32,6 @@ class BootBroadcastReceiver : BroadcastReceiver() {
                     context.startService(serIntent)
                 }
             }
-            AppUtil.startLaunchAPP(context, AppConstant.npsPackName, AppConstant.npsMain)
             AppUtil.startLaunchAPP(context, AppConstant.cblPackName, AppConstant.cblMain)
         }
         Log.i(AppConstant.TAG_COMMON,"BootBroadcastReceiver > onReceive() _ action：$action _ canSmsSync：$canSmsSync")

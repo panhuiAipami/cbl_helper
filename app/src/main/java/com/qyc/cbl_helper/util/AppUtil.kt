@@ -2,8 +2,10 @@ package com.qyc.cbl_helper.util
 
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.ActivityManager.RunningAppProcessInfo
 import android.content.ComponentName
 import android.content.Context
+import android.content.Context.ACTIVITY_SERVICE
 import android.content.Context.TELEPHONY_SERVICE
 import android.content.Intent
 import android.content.IntentFilter
@@ -23,7 +25,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
-
 import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.MyApplication
 import com.qyc.cbl_helper.NpsActivity
@@ -55,6 +56,39 @@ class AppUtil {
                 Hawk.put(LS_KEY_GEN_UUID, genUUID)
                 genUUID
             } else cacheUUID
+        }
+
+        //当本应用位于后台时，则将它切换到最前端
+        fun setTopApp(context: Context) {
+            if (isRunningForeground(context)) {
+                return
+            }
+            //获取ActivityManager
+            val activityManager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+
+            //获得当前运行的task(任务)
+            val taskInfoList = activityManager.getRunningTasks(100)
+            for (taskInfo in taskInfoList) {
+                //找到本应用的 task，并将它切换到前台
+                if (taskInfo.topActivity!!.packageName == context.packageName) {
+                    activityManager.moveTaskToFront(taskInfo.id, 0)
+                    break
+                }
+            }
+        }
+
+        //判断本应用是否已经位于最前端：已经位于最前端时，返回 true；否则返回 false
+        fun isRunningForeground(context: Context): Boolean {
+            val activityManager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+            val appProcessInfoList = activityManager.runningAppProcesses
+            for (appProcessInfo in appProcessInfoList) {
+                if (appProcessInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    && appProcessInfo.processName == context.applicationInfo.processName
+                ) {
+                    return true
+                }
+            }
+            return false
         }
 
         /**
