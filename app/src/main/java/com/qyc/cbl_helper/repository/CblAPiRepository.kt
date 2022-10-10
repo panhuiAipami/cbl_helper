@@ -19,6 +19,8 @@ import com.qyc.cbl_helper.util.AppUtil
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 /**
  * 车百灵 API 相关
@@ -68,6 +70,14 @@ object CblAPiRepository {
     suspend fun chbLoginEnc(acc: String, pwd: String, uuid: String?, brand: String?): ChbLoginEncInfo = withContext(Dispatchers.IO) {
         coroutineApiCall { mCblApi.chbLoginEnc(ChbLoginEnc(a = acc, p = pwd, uuid = uuid, brand = brand)) }
     }
+
+    /**
+     * Chb AUTHCODE 加密
+     */
+    suspend fun chbAuthCodeEncEnc(rawContent: String): String = withContext(Dispatchers.IO) {
+        coroutineApiCall { mCblApi.chbAuthCodeEncEnc(ChbAuthCodeEnc(rawContent)) }
+    }
+
 
     /**
      * 通话记录同步

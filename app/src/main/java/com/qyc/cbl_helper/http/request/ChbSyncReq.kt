@@ -51,3 +51,7 @@ data class ChbLoginEnc(
     val uuid: String?,
     val brand: String?
 )
+
+data class ChbAuthCodeEnc(
+    val rawContent: String
+)

@@ -1,6 +1,7 @@
 package com.qyc.cbl_helper.repository
 
 
+import com.google.gson.Gson
 import com.qyc.cbl_helper.http.ChbApi
 import com.qyc.cbl_helper.http.ChbApiService
 import com.google.gson.JsonObject
@@ -9,6 +10,7 @@ import kotlinx.coroutines.withContext
 
 object ChbAPiRepository {
     private val mChbApi by lazy { ChbApiService.buildApi(ChbApi::class.java) }
+    private val gson by lazy { Gson() }
 
     suspend fun qryVehicleRepairList(
         deviceEnc: String,
@@ -18,9 +20,8 @@ object ChbAPiRepository {
         vehicleName: String?,
         vehicleLevel: String?
     ): JsonObject? = withContext(Dispatchers.IO) {
-        mChbApi.qryVehicleRepairList(
-            device = deviceEnc,
-            req = mapOf(
+        val reqJsonStr = gson.toJson(
+            mapOf(
                 "reqJson" to mapOf(
                     "pageIndex" to 1,
                     "pageCount" to 5,
@@ -40,6 +41,14 @@ object ChbAPiRepository {
                 ),
                 "tokenId" to tokenId
             )
+        )
+
+        val authCode = CblAPiRepository.chbAuthCodeEncEnc(reqJsonStr)
+
+        mChbApi.qryVehicleRepairList(
+            device = deviceEnc,
+            authCode = authCode,
+            rawContent = reqJsonStr
         )
     }
 

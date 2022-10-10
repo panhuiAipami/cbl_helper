@@ -3,6 +3,7 @@ package com.qyc.cbl_helper.http
 import com.google.gson.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.POST
 
 interface ChbApi {
@@ -11,7 +12,8 @@ interface ChbApi {
      * 线索列表
      */
     @POST("rn/qryVehicleRepairList.do")
-    suspend fun qryVehicleRepairList(@Header("DEVICE") device: String, @Body req: @JvmSuppressWildcards Map<String, Any?>): JsonObject?
+    @Headers("Content-Type: application/json;charset=UTF-8")
+    suspend fun qryVehicleRepairList(@Header("DEVICE") device: String, @Header("AUTHCODE") authCode: String, @Body rawContent: String): JsonObject?
 
     /**
      * 登录

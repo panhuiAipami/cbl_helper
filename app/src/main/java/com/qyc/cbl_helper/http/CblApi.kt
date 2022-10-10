@@ -53,6 +53,13 @@ interface CblApi {
     suspend fun chbLoginEnc(@Body req: ChbLoginEnc): CommonResponse<ChbLoginEncInfo>
 
     /**
+     * Chb AUTHCODE 加密
+     */
+    @POST("v1/ins/chb/authcode_enc")
+    suspend fun chbAuthCodeEncEnc(@Body req: ChbAuthCodeEnc): CommonResponse<String>
+
+
+    /**
      * 上传通话记录
      */
     @POST("v1/shop/upload_call_journal")
