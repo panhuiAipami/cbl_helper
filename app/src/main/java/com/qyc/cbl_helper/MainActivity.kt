@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +13,7 @@ import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.qyc.cbl_helper.callback.CallBackSyncStatus
@@ -19,6 +22,7 @@ import com.qyc.cbl_helper.common.ThbSyncHelper
 import com.qyc.cbl_helper.common.TpAppTypeEnum
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.databinding.ActivityMainBinding
+import com.qyc.cbl_helper.repository.PingAnAPiRepository
 import com.qyc.cbl_helper.util.AppUtil
 import com.qyc.cbl_helper.util.AppUtil.Companion.openNpcAPP
 import com.qyc.cbl_helper.util.AppUtil.Companion.setTopApp
@@ -71,12 +75,16 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-            setText()
+            GlobalScope.launch(Dispatchers.Main) {
+                setText()
+            }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         timeReciver = BootBroadcastReceiver()
@@ -102,8 +110,8 @@ class MainActivity : AppCompatActivity() {
 //            testSync()
 //            buildMessage(AppConstant.APP_EDIT)
 //            disconnect()
-
-            reStartDevice()
+//            reStartDevice()
+//            testSync()
         }
         clean.setOnClickListener {
             sb.clear()
@@ -159,27 +167,34 @@ class MainActivity : AppCompatActivity() {
      */
     fun testSync() {
         GlobalScope.launch(Dispatchers.IO) {
-//            PingAnSyncHelper.setInfo(
-//                "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1wIiwiaWF0IjoxNjYyMDk5OTIwLCJzdWIiOiJ7XCJjaGFubmVsQ29kZVwiOlwiUE1TXCIsXCJjaXR5Q29kZVwiOlwiMTEwMTAwXCIsXCJkZXB0Q29kZVwiOlwiMjAxNTFcIixcIm9sZENvZGVzXCI6W3tcIm9sZENvZGVcIjpcIjIwMTIxMDkxMjAwNlwiLFwib2xkQ29kZVR5cGVcIjpcIjAxXCJ9XSxcInJvbGVDb2Rlc1wiOltcImFkbXBfdGVuZW1lbnRfZ2VuZXJhbF9tYW5hZ2VyXCJdLFwidGVsZXBob25lXCI6XCIwRjUwRTA0NDA1Mzk3Q0VDRUJDNTBDREYwRjk2MEYwRFwiLFwidGVuZW1lbnRDb2RlXCI6XCIyMDEyMTA5MTIwMDZcIixcInRlbmVtZW50TmFtZVwiOlwi5YyX5Lqs5YyX5pa556aP55Ge5rG96L2m6ZSA5ZSu5pyN5Yqh5pyJ6ZmQ5YWs5Y-4XCIsXCJ0ZW5lbWVudFR5cGVcIjpcIjEwMVwiLFwidXNlckNvZGVcIjpcIllFRlNQLTY3NzIyXCIsXCJ1c2VyTmFtZVwiOlwi5YWo5LyY6L2m5rWL6K-V5py6b3Bwb1wifSIsImp0aSI6IjIyMDkwMjE0MjgyMDM2MGY0MTkwMDcxIiwiZXhwIjoxNjY0NjkxOTIwLCJuYmYiOjE2NjIwOTk5MjB9.o5m_OCkNdA3pDYFTs_2MaOz2yCSjRRfjgKo-56ViEDY",
-//                "",
-//                true
+            try {//测试平安
+                GlobalScope.launch(Dispatchers.IO) {
+                    PingAnSyncHelper.setInfo(
+                        "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhZG1wIiwiaWF0IjoxNjY2ODM2NjcyLCJzdWIiOiJ7XCJjaGFubmVsQ29kZVwiOlwiUE1TXCIsXCJjaXR5Q29kZVwiOlwiMTEwMTAwXCIsXCJkZXB0Q29kZVwiOlwiMjAxNTFcIixcIm9sZENvZGVzXCI6W3tcIm9sZENvZGVcIjpcIjQ4MDEwMDA2ODU4NFwiLFwib2xkQ29kZVR5cGVcIjpcIjAxXCJ9XSxcInJvbGVDb2Rlc1wiOltcImFkbXBfc2VydmljZV9hZHZpc29yXCJdLFwidGVsZXBob25lXCI6XCIzQkNGMjczMDA3NDQwNzcxOTk1NzQ4MTdDNjk3MkE1NlwiLFwidGVuZW1lbnRDb2RlXCI6XCI0ODAxMDAwNjg1ODRcIixcInRlbmVtZW50TmFtZVwiOlwi5YyX5Lqs56aP55Ge576O5p6X5rG96L2m6ZSA5ZSu5pyN5Yqh5pyJ6ZmQ5YWs5Y-4XCIsXCJ0ZW5lbWVudFR5cGVcIjpcIjEwMVwiLFwidXNlckNvZGVcIjpcIkJRVElVLTI2MDgwXCIsXCJ1c2VyTmFtZVwiOlwi5p2O5aKe5bqGXCJ9IiwianRpIjoiMjIxMDI3MTAxNDEyMDMwN3k3OTEzIiwiZXhwIjoxNjY5NDI4NjcyLCJuYmYiOjE2NjY4MzY2NzJ9.zpVtfEglSualp4K6wlCiWZsob2Un1gtmeT6RRyji3hU",
+                        "10025",
+                        "BQTIU-26080",
+                        true
+                    )
+                    PingAnSyncHelper.handleUpload()
+                }
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            }
+
+
+//            ThbSyncHelper.setInfo(
+//                userId = "100000129",
+//                acc = "w_bffr_gl",
+//                pwd = "Cpic12345!",
+//                tokenId = "a9a729e9961d391fa4cfc2fab2748d31e2d3017572ad108ccdfa602302722536",
+//                deviceEnc = "Xv6zlHoscDb6+5wXOreWXQYVMcs08ozvW0k1ZQ5ow0I3CBHed+L2CPZglnJ4Fkwh",
+//                branchCode = "1010100",
+//                vehicleCode = "4SF30339",
+//                vehicleName = "北京北方福瑞汽车销售服务有限公司",
+//                vehicleLevel = "B"
 //            )
-//            PingAnSyncHelper.handleUpload()
-
-
-            ThbSyncHelper.setInfo(
-                userId = "100000129",
-                acc = "w_bffr_gl",
-                pwd = "Cpic12345!",
-                tokenId = "a9a729e9961d391fa4cfc2fab2748d31e2d3017572ad108ccdfa602302722536",
-                deviceEnc = "Xv6zlHoscDb6+5wXOreWXQYVMcs08ozvW0k1ZQ5ow0I3CBHed+L2CPZglnJ4Fkwh",
-                branchCode = "1010100",
-                vehicleCode = "4SF30339",
-                vehicleName = "北京北方福瑞汽车销售服务有限公司",
-                vehicleLevel = "B"
-            )
-            ThbSyncHelper.setOpenSync(true)
-            ThbSyncHelper.handleUpload()
+//            ThbSyncHelper.setOpenSync(true)
+//            ThbSyncHelper.handleUpload()
         }
     }
 
@@ -219,8 +234,9 @@ class MainActivity : AppCompatActivity() {
                                 val userId = data.getString("userId")
 
                                 if (hasToken) {//好伙伴
+                                    val userCode = data.getString("userCode")
                                     val token = data.getString("token")
-                                    PingAnSyncHelper.setInfo(token, userId, true)
+                                    PingAnSyncHelper.setInfo(token, userId, userCode,true)
                                     GlobalScope.launch(Dispatchers.IO) {
                                         PingAnSyncHelper.handleUpload()
                                     }
@@ -284,15 +300,19 @@ class MainActivity : AppCompatActivity() {
                     sendMsg(AppConstant.HEARTBEAT)
                 }
                 sb.append(msg + "\n")
-                log.text = sb
+                GlobalScope.launch(Dispatchers.Main) {
+                    log.text = sb
+                }
                 Log.i(TAG, msg)
             }
 
             override fun onError(ex: Exception?) {
                 super.onError(ex)
                 val msg = "websocket连接错误"
-//                sb.append(msg+"\n")
-//                log.text = sb
+                sb.append(msg + "\n")
+                GlobalScope.launch(Dispatchers.Main) {
+                    log.text = sb
+                }
                 Log.e(TAG, "$msg：$ex")
             }
 
@@ -300,7 +320,9 @@ class MainActivity : AppCompatActivity() {
                 super.onClose(code, reason, remote)
                 val msg = "websocket断开连接：·code:$code·reason:$reason·remote:$remote"
                 sb.append(msg + "\n")
-                log.text = sb
+                GlobalScope.launch(Dispatchers.Main) {
+                    log.text = sb
+                }
                 Log.e(TAG, msg)
 
                 if (code != 1000) {
@@ -496,5 +518,10 @@ class MainActivity : AppCompatActivity() {
                 setTopApp(context)
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
     }
 }

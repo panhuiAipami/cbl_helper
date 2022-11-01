@@ -6,13 +6,11 @@ import com.qyc.cbl_helper.repository.PingAnAPiRepository
 import cn.cpocar.qyc_cbl.util.AESCrypt
 import com.google.gson.JsonObject
 import com.orhanobut.hawk.Hawk
-import com.qyc.cbl_helper.MainActivity
 import com.qyc.cbl_helper.callback.CallBackSyncStatus
 import com.qyc.cbl_helper.constant.AppConstant
 import com.qyc.cbl_helper.http.request.HhbSyncReq
 import com.qyc.cbl_helper.repository.CblAPiRepository
 import com.qyc.cbl_helper.util.AppUtil
-import com.qyc.cbl_helper.websocket.JWebSocketClient
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
 import java.util.*
@@ -26,6 +24,8 @@ object PingAnSyncHelper {
 
     /** 本地存储Key - phone */
     private const val LS_KEY_PHONE = "ls_key_ping_an_phone"
+    /** 本地存储Key - userCode */
+    private const val LS_KEY_USER_CODE = "ls_key_ping_an_user_code"
 
     /** 本地存储Key - mIsOpen */
     private const val LS_KEY_IS_OPEN = "ls_key_ping_an_is_open"
@@ -40,6 +40,7 @@ object PingAnSyncHelper {
     private var mToken: String? = null
     private var mPhone: String? = null
     private var mUserId: String = ""
+    private var mUserCode: String? = null
     private var mIsOpen: Boolean = false
     private lateinit var callBack: CallBackSyncStatus
 
@@ -49,18 +50,22 @@ object PingAnSyncHelper {
         if (null == mToken) {
             mToken = Hawk.get<String>(LS_KEY_TOKEN)
         }
-
         if (null == mPhone) {
             mPhone = Hawk.get<String>(LS_KEY_PHONE)
         }
+
         mUserId = Hawk.get<String>(LS_KEY_USER_ID,"")
 
+        if (null == mUserCode) {
+            mUserCode = Hawk.get<String>(LS_KEY_USER_CODE)
+        }
         mIsOpen = Hawk.get<Boolean>(LS_KEY_IS_OPEN, false)
     }
 
     fun getToken(): String? = mToken
     fun getUserId(): String = mUserId
     fun getPhone(): String? = mPhone
+    fun getUserCode(): String? = mUserCode
     fun getIsOpen(): Boolean = mIsOpen
 
 
@@ -81,24 +86,31 @@ object PingAnSyncHelper {
     fun setInfo(
         token: String?,
         userId: String,
+        userCode: String?,
         isOpen: Boolean
     ) {
         mToken = token
-        mUserId = userId
+        mUserCode = userCode
         mIsOpen = isOpen
         if (token.isNullOrBlank()) {
             Hawk.delete(LS_KEY_TOKEN)
         } else {
             Hawk.put(LS_KEY_TOKEN, token)
         }
-        if (userId.isBlank()) {
+        if (userId.isNullOrBlank()) {
             Hawk.delete(LS_KEY_USER_ID)
         } else {
             Hawk.put(LS_KEY_USER_ID, mUserId)
         }
+        if (userCode.isNullOrBlank()) {
+            Hawk.delete(LS_KEY_USER_CODE)
+        } else {
+            Hawk.put(LS_KEY_USER_CODE, mUserCode)
+        }
 
         Hawk.put(LS_KEY_IS_OPEN, isOpen)
     }
+
 
 
     suspend fun handleUpload() {
@@ -110,7 +122,8 @@ object PingAnSyncHelper {
             val startTime: CharSequence =
                 DateFormat.format(pattern, Date().time - 7 * 24 * 60 * 60 * 1000)
             val endTimeTime: CharSequence = DateFormat.format(pattern, Date().time)
-            val token = getToken();
+            val token = getToken()
+            val userCode = getUserCode()
             if (token != null) {
                 val result = PingAnAPiRepository.getClueTracksList(
                     mToken = token,
@@ -121,7 +134,7 @@ object PingAnSyncHelper {
                 val code = result?.get("code")?.asString;
                 val msg = result?.get("msg")?.asString;
                 val listData = result?.getAsJsonObject("data");
-                val clueList = listData?.getAsJsonArray("afterSaleClueInfoDTOS");
+                val clueList = listData?.getAsJsonArray("repairInfoList");
 
                 SamplingHelper.sampling(
                     "PingAnSyncHelper", "ping_an_sync_clue_list_res",
@@ -132,13 +145,13 @@ object PingAnSyncHelper {
                 )
 
                 //获取线索数据成功
-                if (result != null && result.get("success").asBoolean) {
+                if (result != null && code == "000000") {
                     callBack.syncStatus(TpAppTypeEnum.HHB,AppConstant.SYNC_SUCCESS)
                     if (clueList != null) {
                         var lastClueTime = Hawk.get<Long?>(LS_KEY_PINGAN_LAST_SYNC_TIME)
                         val uploadData = mutableListOf<HhbSyncReq>()
                         for (i in clueList.size() - 1 downTo 0) {
-                            val item = clueList?.get(i).asJsonObject;
+                            val item = clueList.get(i).asJsonObject;
                             val clueTime = item.get("updatedAt").asString
                             val nowClueTime = format.parse(clueTime, ParsePosition(0)).time
 
@@ -146,33 +159,42 @@ object PingAnSyncHelper {
                             if (lastClueTime == null || nowClueTime > lastClueTime) {
                                 val clueId = item.get("clueId").asString;
                                 val reportNo = item.get("reportNo").asString;
-                                var hhbSyncReq: HhbSyncReq
 
-                                //获取详情数据
-                                val resultDetail = PingAnAPiRepository.getClueTracksDetail(
-                                    mToken = token,
-                                    taskId = clueId,
-                                    reportId = reportNo
-                                )
-                                if (resultDetail != null && resultDetail.has("data")) {
-                                    val data = resultDetail.getAsJsonObject("data")
-                                    hhbSyncReq = buildHhbSyncReq(clueId, item, data)
+                                //获取详情数据 TODO 暂时不获取详情
+//                                val resultDetail = PingAnAPiRepository.getClueTracksDetail(
+//                                    mToken = token,
+//                                    taskId = clueId,
+//                                    reportId = reportNo
+//                                )
+//                                if (resultDetail != null && resultDetail.has("data")) {
+//                                    val data = resultDetail.getAsJsonObject("data")
+//                                    hhbSyncReq = buildHhbSyncReq(clueId, item, data)
+//
+//                                } else {
+//                                    hhbSyncReq = buildHhbSyncReq(clueId, item, null)
+//                                }
+                                val hhbSyncReq: HhbSyncReq = buildHhbSyncReq(clueId, item, null)
 
-                                } else {
-                                    hhbSyncReq = buildHhbSyncReq(clueId, item, null)
-                                }
 
-                                //获取线索经纬度
-                                val resultData = PingAnAPiRepository.getCaseAccidentSite(
-                                    mToken = token,
-                                    clueId = clueId
-                                )
-                                if (resultData != null) {
-                                    val longitude = resultData.get("damagePlaceGpsX")?.asDouble
-                                    val latitude = resultData.get("damagePlaceGpsY")?.asDouble
+                                if (clueList.size() == 1) {
+                                    try {
+                                        //获取线索经纬度,只有一条的时候取经纬度，防止并发判断为异常调用
+                                        val resultData = PingAnAPiRepository.getCaseAccidentSite(
+                                            mToken = token,
+                                            clueId = clueId
+                                        )
+                                        if (resultData != null) {
+                                            val longitude =
+                                                resultData.get("damagePlaceGpsX")?.asDouble
+                                            val latitude =
+                                                resultData.get("damagePlaceGpsY")?.asDouble
 
-                                    hhbSyncReq.lat = latitude;
-                                    hhbSyncReq.lng = longitude;
+                                            hhbSyncReq.lat = latitude
+                                            hhbSyncReq.lng = longitude
+                                        }
+                                    } catch (e: java.lang.Exception) {
+                                        e.printStackTrace()
+                                    }
                                 }
 
                                 Log.i("AddLoadData", "---需上传的数据--->$hhbSyncReq")
@@ -204,7 +226,7 @@ object PingAnSyncHelper {
 
                         SamplingHelper.sampling(
                             "PingAnSyncHelper", "ping_an_sync_clue",
-                            "querySize" to "${clueList?.size() ?: "0"}",
+                            "querySize" to "${clueList.size() ?: "0"}",
                             "uploadSize" to "${uploadData.size}"
                         )
                         callBack.syncStatus(TpAppTypeEnum.HHB,AppConstant.SYNC_SUCCESS)
@@ -230,12 +252,12 @@ object PingAnSyncHelper {
             accidentAddress = item.get("accidentPlace")?.asString,
             time = item.get("clueTime")?.asString,
             responseTypeStr = item.get("channelType")?.asString,//责任类型 01 自责， 02 三者
-            cooperInsClueTypeStr = item.get("recommendRepairType")?.asString,//推修类型 01 送修，02 返修
+            cooperInsClueTypeStr = (if(item.get("recommendRepairType").isJsonNull) "" else item.get("recommendRepairType")?.asString),//推修类型 01 送修，02 返修
 
             //详情
-            accidentTypeStr = data?.get("accidentType")?.asString,//事故类型 1单方，2双方
-            carTrimName = data?.get("carType")?.asString,//车型
-            accidentImages = data?.get("fileIdList")?.asJsonArray?.map { it.asString },// 事故照片
+            accidentTypeStr = "",//事故类型 1单方，2双方
+            carTrimName = "",//车型
+            accidentImages = null,// 事故照片
 
             //经纬度
             lat = null,
@@ -245,7 +267,7 @@ object PingAnSyncHelper {
     }
 
     fun clearAllInfo(code:Int) {
-        setInfo(null, mUserId, mIsOpen)
+        setInfo(null, mUserId, mUserCode,mIsOpen)
         callBack.syncStatus(TpAppTypeEnum.HHB,code)
     }
 

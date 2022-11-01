@@ -2,16 +2,15 @@ package com.qyc.cbl_helper.http
 
 import android.util.Log
 import com.qyc.cbl_helper.common.PingAnSyncHelper
-import com.qyc.cbl_helper.common.PushMessageNotificationHelper
-import com.qyc.cbl_helper.common.TpAppTypeEnum
+
 
 import okhttp3.Interceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-object PingAnApiService : BaseApiService() {
-    override fun getApiBaseUrl() = "https://icore-idtm.pingan.com.cn/"
+object PingAn4sApiService : BaseApiService() {
+    override fun getApiBaseUrl() = "https://4scloud-web.pingan.com/"
 
     override fun buildRetrofit(): Retrofit {
         return Retrofit.Builder()
@@ -29,7 +28,7 @@ object PingAnApiService : BaseApiService() {
 //            PushMessageNotificationHelper.showTpAppLogoutNotify(TpAppTypeEnum.HHB)
             PingAnSyncHelper.clearAllInfo(response.code)
         }else if(response.code == 500){
-            Log.e("PingAnApiService","error:$response")
+            Log.e("PingAn4sApiService","error:$response")
         }
         response
     }
