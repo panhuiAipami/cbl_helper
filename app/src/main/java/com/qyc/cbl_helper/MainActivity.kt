@@ -221,7 +221,9 @@ class MainActivity : AppCompatActivity() {
                 if (message != AppConstant.HEARTBEAT) {
                     sb.append("websocket收到消息" + "\n")
                     sb.append(message + "\n")
-                    log.text = sb
+                    GlobalScope.launch(Dispatchers.Main) {
+                        log.text = sb
+                    }
                     Log.i(TAG, "websocket收到消息：$message")
 
                     try {

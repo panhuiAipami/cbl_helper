@@ -29,6 +29,7 @@ import com.orhanobut.hawk.Hawk
 import com.qyc.cbl_helper.MyApplication
 import com.qyc.cbl_helper.NpsActivity
 import com.qyc.cbl_helper.constant.AppConstant
+import com.qyc.cbl_helper.enums.NetworkTypeEnum
 import com.qyc.cbl_helper.service.SmsSyncService
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -308,6 +309,38 @@ class AppUtil {
                     return mNetworkInfo.isAvailable
                 }
             return false
+        }
+
+        fun getNetworkType(): NetworkTypeEnum {
+            val connectivityManager = MyApplication.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkInfo = connectivityManager.activeNetworkInfo ?: return NetworkTypeEnum.NO_NETWORK
+
+            return when (networkInfo.type) {
+                ConnectivityManager.TYPE_WIFI -> NetworkTypeEnum.WIFI
+                ConnectivityManager.TYPE_MOBILE -> {
+                    val nSubType = networkInfo.subtype
+                    val telephonyManager = MyApplication.getInstance().getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                    return if (nSubType == TelephonyManager.NETWORK_TYPE_LTE && !telephonyManager.isNetworkRoaming) {
+                        // 4G
+                        NetworkTypeEnum.CELLULAR_4G
+                    } else if (nSubType == TelephonyManager.NETWORK_TYPE_UMTS
+                        || nSubType == TelephonyManager.NETWORK_TYPE_HSDPA
+                        || nSubType == TelephonyManager.NETWORK_TYPE_EVDO_0
+                        && !telephonyManager.isNetworkRoaming) {
+                        // 3G 联通的3G为UMTS或HSDPA 电信的3G为EVDO
+                        NetworkTypeEnum.CELLULAR_3G
+                    } else if (nSubType == TelephonyManager.NETWORK_TYPE_GPRS
+                        || nSubType == TelephonyManager.NETWORK_TYPE_EDGE
+                        || nSubType == TelephonyManager.NETWORK_TYPE_CDMA
+                        && !telephonyManager.isNetworkRoaming) {
+                        // 2G 移动和联通的2G为GPRS或EGDE，电信的2G为CDMA
+                        NetworkTypeEnum.CELLULAR_2G
+                    } else {
+                        NetworkTypeEnum.CELLULAR
+                    }
+                }
+                else -> NetworkTypeEnum.CELLULAR
+            }
         }
 
 
