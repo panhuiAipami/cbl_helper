@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
             when (type) {
                 TpAppTypeEnum.THB -> {
                     if (code != AppConstant.SYNC_SUCCESS) {
+                        if(ThbSyncHelper.getAcc() != null)//配置过账号，发掉线提醒
                         buildMessage(AppConstant.APP_DROP_LINE)
                     } else {
                         buildMessage(AppConstant.APP_EDIT)
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 TpAppTypeEnum.HHB -> {
                     if (code != AppConstant.SYNC_SUCCESS) {
+                        if(PingAnSyncHelper.getPhone() != null)//配置过账号，发掉线提醒
                         buildMessage(AppConstant.APP_DROP_LINE)
                     } else {
                         buildMessage(AppConstant.APP_EDIT)
@@ -111,7 +113,7 @@ class MainActivity : AppCompatActivity() {
 //            buildMessage(AppConstant.APP_EDIT)
 //            disconnect()
 //            reStartDevice()
-//            testSync()
+            testSync()
         }
         clean.setOnClickListener {
             sb.clear()
