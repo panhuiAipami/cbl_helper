@@ -61,16 +61,14 @@ class MainActivity : AppCompatActivity() {
             Log.i(TAG, "$type------syncStatus--------是否同步：${code == AppConstant.SYNC_SUCCESS}")
             when (type) {
                 TpAppTypeEnum.THB -> {
-                    if (code != AppConstant.SYNC_SUCCESS) {
-                        if(ThbSyncHelper.getAcc() != null)//配置过账号，发掉线提醒
+                    if (code != AppConstant.SYNC_SUCCESS && ThbSyncHelper.getAcc() != null) {
                         buildMessage(AppConstant.APP_DROP_LINE)
                     } else {
                         buildMessage(AppConstant.APP_EDIT)
                     }
                 }
                 TpAppTypeEnum.HHB -> {
-                    if (code != AppConstant.SYNC_SUCCESS) {
-                        if(PingAnSyncHelper.getPhone() != null)//配置过账号，发掉线提醒
+                    if (code != AppConstant.SYNC_SUCCESS && PingAnSyncHelper.getPhone() != null) {
                         buildMessage(AppConstant.APP_DROP_LINE)
                     } else {
                         buildMessage(AppConstant.APP_EDIT)

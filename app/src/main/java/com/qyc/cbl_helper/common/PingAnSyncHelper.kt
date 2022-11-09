@@ -91,13 +91,14 @@ object PingAnSyncHelper {
     ) {
         mToken = token
         mUserCode = userCode
+        mUserId = userId
         mIsOpen = isOpen
         if (token.isNullOrBlank()) {
             Hawk.delete(LS_KEY_TOKEN)
         } else {
             Hawk.put(LS_KEY_TOKEN, token)
         }
-        if (userId.isNullOrBlank()) {
+        if (userId.isBlank()) {
             Hawk.delete(LS_KEY_USER_ID)
         } else {
             Hawk.put(LS_KEY_USER_ID, mUserId)
