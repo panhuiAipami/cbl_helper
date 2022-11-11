@@ -23,6 +23,7 @@ object SamplingHelper {
 //        val (w, h) = AppUtil.getScreenSize()
 //        "${w}x$h"
 //    }
+    private val deviceId by lazy { AppUtil.getUUID()} // 系统版本
     private val sysVersion by lazy { Build.VERSION.RELEASE } // 系统版本
     private val brandVersion by lazy { Build.VERSION.INCREMENTAL } // android 厂商 rom 版本号，比如  miui 11.0.5、emui 10.1
     private val brand by lazy { Build.MANUFACTURER } // 品牌
@@ -67,7 +68,7 @@ object SamplingHelper {
             finalCustomParams = "&$customParams"
         }
         val uid = PingAnSyncHelper.getUserId().ifBlank { ThbSyncHelper.getUserId()}
-        val finalParams = "userId=${uid}&platform=DevBoard&url=$url$finalEvent&sv=$sysVersion&bv=$brandVersion&adt=${Build.MODEL}&brand=$brand$finalCustomParams&jv=$appVersion&ct=${AppUtil.getNetworkType().value}$finalCustomParams"
+        val finalParams = "deviceId=${deviceId}&userId=${uid}&platform=DevBoard&url=$url$finalEvent&sv=$sysVersion&bv=$brandVersion&adt=${Build.MODEL}&brand=$brand$finalCustomParams&jv=$appVersion&ct=${AppUtil.getNetworkType().value}$finalCustomParams"
         Log.i(AppConstant.TAG_COMMON, "sampling() params：$finalParams")
         GlobalScope.launch(Dispatchers.IO) {
             try {
