@@ -225,10 +225,11 @@ object PingAnSyncHelper {
                         }
                         if (upLoadSuccess) Hawk.put(LS_KEY_PINGAN_LAST_SYNC_TIME, lastClueTime)
 
+                        var size = uploadData.size
                         SamplingHelper.sampling(
                             "PingAnSyncHelper", "ping_an_sync_clue",
-                            "querySize" to "${clueList.size() ?: "0"}",
-                            "uploadSize" to "${uploadData.size}"
+                            "querySize" to "${clueList.size()}",
+                            "uploadSize" to "$size", "clueTime" to (if(size >0) uploadData[size-1].time.toString() else "0")
                         )
                         callBack.syncStatus(TpAppTypeEnum.HHB,AppConstant.SYNC_SUCCESS)
                     }

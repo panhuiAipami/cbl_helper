@@ -289,11 +289,12 @@ object ThbSyncHelper {
                     Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() find clue size：${repairInfoList?.size()}")
                     callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_SUCCESS)
                     var uploadSize = 0
+                    var uploadData: MutableList<ChbSyncReq>? = null
                     if (null != repairInfoList && repairInfoList.size() > 0) {
                         var curMaxId = 0L
                         val lastId = Hawk.get<Long?>(LS_KEY_CHB_LAST_SYNC_ID)
                         Log.i(AppConstant.TAG_CHB_SYNC, "handleUpload() lastId：$lastId")
-                        val uploadData = mutableListOf<ChbSyncReq>()
+                        uploadData = mutableListOf()
                         for (i in 0 until repairInfoList.size()) {
                             val repairInfo = repairInfoList.get(i).asJsonObject
                             val id = repairInfo.get("id").asLong
@@ -346,7 +347,7 @@ object ThbSyncHelper {
                     SamplingHelper.sampling(
                         "NotificationReceiver", "chb_sync_clue",
                         "querySize" to "${repairInfoList?.size() ?: "0"}",
-                        "uploadSize" to "$uploadSize"
+                        "uploadSize" to "$uploadSize", "clueTime" to (if(uploadSize >0) uploadData?.get(uploadSize-1)?.time.toString() else "0")
                     )
                     callBack.syncStatus(TpAppTypeEnum.THB,AppConstant.SYNC_SUCCESS)
                 }
