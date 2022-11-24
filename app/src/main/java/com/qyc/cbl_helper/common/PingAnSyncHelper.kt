@@ -271,6 +271,12 @@ object PingAnSyncHelper {
     fun clearAllInfo(code:Int) {
         setInfo(null, mUserId, mUserCode,mIsOpen)
         callBack.syncStatus(TpAppTypeEnum.HHB,code)
+
+        SamplingHelper.sampling(
+            "PingAnSyncHelper", "ping_an_sync_failure",
+            "message" to "同步异常" ,
+            ("code" to code.toString())
+        )
     }
 
 
